@@ -739,7 +739,7 @@
                         <span class="font-medium text-sm">${diagnostic.name}</span>
                     </div>
                     <div class="text-right">
-                        <div class="font-semibold text-sm">${price}€</div>
+                        <div class="font-semibold text-sm">${price.toFixed(2)}€</div>
                         <div class="check-indicator w-4 h-4 rounded-full border-2 border-gray-300"></div>
                     </div>
                 `;
@@ -786,8 +786,8 @@
             selectedDiagnostics.forEach(diagnosticId => {
                 const price = getTarif(selectedPropertyType, selectedSize, diagnosticId);
                 const diagnostic = diagnosticsOptions[selectedPropertyType].find(d => d.id === diagnosticId);
-                total += price;
-                details.push(`${diagnostic.name}: ${price}€`);
+                total += price; // Garder la précision exacte
+                details.push(`${diagnostic.name}: ${price.toFixed(2)}€`);
             });
             
             // Calcul des remises
@@ -797,7 +797,7 @@
             
             if (nbDiagnostics >= 3) {
                 tauxRemise = remisesReelles[Math.min(nbDiagnostics, 8)] || 0;
-                remise = total * (tauxRemise / 100);
+                remise = total * (tauxRemise / 100); // Calcul précis de la remise
             }
             
             const totalFinal = total - remise;
@@ -812,7 +812,7 @@
                     <div class="flex justify-between"><span>Sous-total:</span><span class="font-medium">${total.toFixed(2)}€</span></div>
                     ${remise > 0 ? `<div class="flex justify-between text-green-600"><span>Remise ${tauxRemise}% (${nbDiagnostics} diagnostics):</span><span class="font-medium">-${remise.toFixed(2)}€</span></div>` : ''}
                     <div class="flex justify-between font-bold text-xl border-t-2 border-blue-600 pt-3">
-                        <span>Total:</span><span class="text-blue-600">${totalFinal.toFixed(2)}€</span>
+                        <span>Total:</span><span class="text-blue-600">${Math.round(totalFinal)}€</span>
                     </div>
                 </div>
                 <div class="mt-6 p-4 bg-blue-50 rounded-lg">
