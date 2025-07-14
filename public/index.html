@@ -176,18 +176,21 @@
                 <p class="text-xl text-gray-600">Version démo limitée - La version complète est disponible sur mobile</p>
             </div>
             
-            <!-- Calculatrice démo intégrée - Style mobile identique -->
-            <div class="max-w-4xl mx-auto">
+            <!-- Calculatrice démo intégrée - Interface fixe sans scroll -->
+            <div class="max-w-6xl mx-auto">
                 <div class="bg-white rounded-xl shadow-lg p-8">
-                    <div class="grid md:grid-cols-2 gap-8">
-                        <div>
+                    <div class="grid md:grid-cols-2 gap-8 min-h-[600px]">
+                        <!-- Colonne de gauche - Interface de sélection -->
+                        <div class="relative">
                             <h3 class="text-xl font-semibold mb-6">Calculez votre devis diagnostic</h3>
                             
-                            <div class="space-y-6">
-                                <!-- Sélection du type de bien -->
-                                <div>
-                                    <label class="block text-sm font-medium text-gray-700 mb-3">Type de bien</label>
-                                    <div class="space-y-2">
+                            <!-- Conteneur avec hauteur fixe pour éviter le scroll -->
+                            <div class="relative h-[500px] overflow-hidden">
+                                
+                                <!-- Étape 1 : Sélection du type de bien -->
+                                <div id="step1" class="absolute top-0 left-0 w-full transition-all duration-500 ease-in-out transform">
+                                    <label class="block text-sm font-medium text-gray-700 mb-4">1. Choisissez le type de bien</label>
+                                    <div class="space-y-3">
                                         <button type="button" onclick="selectPropertyType('appartement')" 
                                                 class="property-btn w-full p-4 rounded-xl border-2 transition-all duration-300 flex items-center space-x-3" 
                                                 data-type="appartement">
@@ -235,25 +238,37 @@
                                     </div>
                                 </div>
 
-                                <!-- Sélection de la taille (affiché après sélection du type) -->
-                                <div id="sizeSelection" class="hidden">
-                                    <label class="block text-sm font-medium text-gray-700 mb-3">Taille du bien</label>
+                                <!-- Étape 2 : Sélection de la taille -->
+                                <div id="step2" class="absolute top-0 left-0 w-full transition-all duration-500 ease-in-out transform translate-x-full opacity-0">
+                                    <div class="flex items-center justify-between mb-4">
+                                        <label class="block text-sm font-medium text-gray-700">2. Taille du bien</label>
+                                        <button onclick="goToStep(1)" class="text-blue-600 hover:text-blue-800 text-sm">
+                                            <i class="fas fa-arrow-left mr-1"></i>Retour
+                                        </button>
+                                    </div>
+                                    <div id="selectedTypeDisplay" class="text-sm text-gray-600 mb-4 p-2 bg-blue-50 rounded-lg"></div>
                                     <div id="sizeButtons" class="grid grid-cols-2 gap-2">
                                         <!-- Les boutons de taille seront générés par JavaScript -->
                                     </div>
                                 </div>
 
-                                <!-- Sélection des diagnostics (affiché après sélection de la taille) -->
-                                <div id="diagnosticsSelection" class="hidden">
-                                    <label class="block text-sm font-medium text-gray-700 mb-3">Diagnostics souhaités</label>
-                                    <div id="diagnosticsButtons" class="space-y-2">
+                                <!-- Étape 3 : Sélection des diagnostics -->
+                                <div id="step3" class="absolute top-0 left-0 w-full transition-all duration-500 ease-in-out transform translate-x-full opacity-0">
+                                    <div class="flex items-center justify-between mb-4">
+                                        <label class="block text-sm font-medium text-gray-700">3. Diagnostics souhaités</label>
+                                        <button onclick="goToStep(2)" class="text-blue-600 hover:text-blue-800 text-sm">
+                                            <i class="fas fa-arrow-left mr-1"></i>Retour
+                                        </button>
+                                    </div>
+                                    <div id="selectedSizeDisplay" class="text-sm text-gray-600 mb-4 p-2 bg-blue-50 rounded-lg"></div>
+                                    <div id="diagnosticsButtons" class="space-y-2 max-h-80 overflow-y-auto">
                                         <!-- Les boutons de diagnostics seront générés par JavaScript -->
                                     </div>
+                                    <button onclick="calculerDevis()" class="w-full bg-blue-600 text-white py-3 rounded-lg hover:bg-blue-700 transition mt-4" id="calculateBtn">
+                                        <i class="fas fa-calculator mr-2"></i>Calculer le devis
+                                    </button>
                                 </div>
                                 
-                                <button onclick="calculerDevisStyle()" class="w-full bg-blue-600 text-white py-3 rounded-lg hover:bg-blue-700 transition hidden" id="calculateBtn">
-                                    Calculer le devis
-                                </button>
                             </div>
                         </div>
                         
@@ -532,7 +547,7 @@
                 <div>
                     <h4 class="font-semibold mb-4">Contact</h4>
                     <div class="text-gray-400 space-y-2">
-                        <p><i class="fas fa-envelope mr-2"></i>support@calculdiag.fr</p>
+                        <p><i class="fas fa-envelope mr-2"></i>contact@calculdiag.fr</p>
                         <p><i class="fas fa-globe mr-2"></i>www.calculdiag.fr</p>
                     </div>
                 </div>
@@ -544,18 +559,36 @@
     </footer>
 
     <script>
-    <script>
-        // Variables globales pour la démo mobile
+        // Variables globales pour la démo
         let selectedPropertyType = '';
         let selectedSize = '';
         let selectedDiagnostics = [];
+        let currentStep = 1;
 
-        // Configuration identique à votre app mobile
+        // Configuration des options par type de bien
         const sizeOptions = {
             appartement: ['1 pièce', '2 pièces', '3 pièces', '4 pièces', '5 pièces', '6 pièces', '7 pièces'],
             maison: ['2 pièces', '3 pièces', '4 pièces', '5 pièces', '6 pièces', '7 pièces'],
             commerce: ['Petit commerce (<50m²)', 'Commerce moyen (50-200m²)', 'Grand commerce (>200m²)']
         };
+
+        // Navigation entre les étapes
+        function goToStep(step) {
+            const steps = ['step1', 'step2', 'step3'];
+            
+            // Masquer l'étape actuelle
+            const currentStepEl = document.getElementById(steps[currentStep - 1]);
+            currentStepEl.style.transform = 'translateX(-100%)';
+            currentStepEl.style.opacity = '0';
+            
+            // Afficher la nouvelle étape
+            setTimeout(() => {
+                const newStepEl = document.getElementById(steps[step - 1]);
+                newStepEl.style.transform = 'translateX(0)';
+                newStepEl.style.opacity = '1';
+                currentStep = step;
+            }, 300);
+        }
 
         const diagnosticsOptions = {
             appartement: [
@@ -587,22 +620,63 @@
             ]
         };
 
+        // Grille tarifaire complète
+        const tarifsReels = {
+            maison: {
+                '2 pièces': { erp: 35, dpe: 103.50, amiante: 86.25, termites: 86.25, metrage: 97.75, gaz: 97.75, electricite: 80.50, plomb: 103.50 },
+                '3 pièces': { erp: 35, dpe: 117, amiante: 97.50, termites: 97.50, metrage: 110.50, gaz: 110.50, electricite: 91, plomb: 117 },
+                '4 pièces': { erp: 35, dpe: 126, amiante: 105, termites: 105, metrage: 119, gaz: 119, electricite: 98, plomb: 126 },
+                '5 pièces': { erp: 35, dpe: 135, amiante: 112.50, termites: 112.50, metrage: 127.50, gaz: 127.50, electricite: 105, plomb: 135 },
+                '6 pièces': { erp: 35, dpe: 180, amiante: 150, termites: 150, metrage: 170, gaz: 170, electricite: 140, plomb: 180 },
+                '7 pièces': { erp: 35, dpe: 225, amiante: 187.50, termites: 187.50, metrage: 212.50, gaz: 212.50, electricite: 175, plomb: 225 }
+            },
+            appartement: {
+                '1 pièce': { erp: 35, dpe: 90, amiante: 75, termites: 75, metrage: 85, gaz: 85, electricite: 70, plomb: 90 },
+                '2 pièces': { erp: 35, dpe: 94.50, amiante: 78.75, termites: 78.75, metrage: 89.25, gaz: 89.25, electricite: 73.50, plomb: 94.50 },
+                '3 pièces': { erp: 35, dpe: 99, amiante: 82.50, termites: 82.50, metrage: 93.50, gaz: 93.50, electricite: 77, plomb: 99 },
+                '4 pièces': { erp: 35, dpe: 103.50, amiante: 86.25, termites: 86.25, metrage: 97.75, gaz: 97.75, electricite: 80.50, plomb: 103.50 },
+                '5 pièces': { erp: 35, dpe: 112.50, amiante: 93.75, termites: 93.75, metrage: 106.25, gaz: 106.25, electricite: 87.50, plomb: 112.50 },
+                '6 pièces': { erp: 35, dpe: 117, amiante: 97.50, termites: 97.50, metrage: 110.50, gaz: 110.50, electricite: 91, plomb: 117 },
+                '7 pièces': { erp: 35, dpe: 126, amiante: 105, termites: 105, metrage: 119, gaz: 119, electricite: 98, plomb: 126 }
+            },
+            commerce: {
+                'Petit commerce (<50m²)': { erp: 35, dpe: 117, amiante: 98, termites: 98, metrage: 115 },
+                'Commerce moyen (50-200m²)': { erp: 35, dpe: 130, amiante: 110, termites: 110, metrage: 125 },
+                'Grand commerce (>200m²)': { erp: 35, dpe: 210, amiante: 190, termites: 190, metrage: 200 }
+            }
+        };
+
+        // Système de remises
+        const remisesReelles = {
+            3: 7, 4: 13, 5: 28, 6: 32, 7: 34, 8: 40
+        };
+
         // Sélection du type de bien
         function selectPropertyType(type) {
             selectedPropertyType = type;
             selectedSize = '';
             selectedDiagnostics = [];
             
-            // Mise à jour visuelle des boutons de type
+            // Reset visual states
             document.querySelectorAll('.property-btn').forEach(btn => {
                 btn.classList.remove('selected');
             });
             document.querySelector(`[data-type="${type}"]`).classList.add('selected');
             
-            // Affichage de la sélection de taille
+            // Afficher le type sélectionné
+            document.getElementById('selectedTypeDisplay').innerHTML = `
+                <i class="fas fa-check text-green-600 mr-2"></i>
+                Type sélectionné : <strong>${type.charAt(0).toUpperCase() + type.slice(1)}</strong>
+            `;
+            
+            // Préparer les options de taille
             showSizeSelection();
-            document.getElementById('diagnosticsSelection').classList.add('hidden');
-            document.getElementById('calculateBtn').classList.add('hidden');
+            
+            // Aller à l'étape 2
+            setTimeout(() => goToStep(2), 500);
+            
+            // Reset du résultat
+            document.getElementById('resultat').innerHTML = '<p class="text-gray-500 text-center">Remplissez le formulaire pour voir votre devis</p>';
         }
 
         // Affichage des options de taille
@@ -615,26 +689,33 @@
                 button.type = 'button';
                 button.className = 'size-btn';
                 button.textContent = size;
-                button.onclick = () => selectSize(size);
+                button.onclick = () => selectSize(size, button);
                 sizeContainer.appendChild(button);
             });
-            
-            document.getElementById('sizeSelection').classList.remove('hidden');
         }
 
         // Sélection de la taille
-        function selectSize(size) {
+        function selectSize(size, buttonElement) {
             selectedSize = size;
             selectedDiagnostics = [];
             
-            // Mise à jour visuelle des boutons de taille
+            // Reset visual states
             document.querySelectorAll('.size-btn').forEach(btn => {
                 btn.classList.remove('selected');
             });
-            event.target.classList.add('selected');
+            buttonElement.classList.add('selected');
             
-            // Affichage de la sélection des diagnostics
+            // Afficher la taille sélectionnée
+            document.getElementById('selectedSizeDisplay').innerHTML = `
+                <i class="fas fa-check text-green-600 mr-2"></i>
+                Bien sélectionné : <strong>${selectedPropertyType.charAt(0).toUpperCase() + selectedPropertyType.slice(1)} de ${size}</strong>
+            `;
+            
+            // Préparer les options de diagnostics
             showDiagnosticsSelection();
+            
+            // Aller à l'étape 3
+            setTimeout(() => goToStep(3), 500);
         }
 
         // Affichage des options de diagnostics
@@ -643,31 +724,28 @@
             diagnosticsContainer.innerHTML = '';
             
             diagnosticsOptions[selectedPropertyType].forEach(diagnostic => {
+                const price = getTarif(selectedPropertyType, selectedSize, diagnostic.id);
+                
                 const button = document.createElement('button');
                 button.type = 'button';
-                button.className = 'diagnostic-btn w-full p-4 rounded-xl flex items-center justify-between';
+                button.className = 'diagnostic-btn w-full p-3 rounded-xl flex items-center justify-between';
                 button.onclick = () => toggleDiagnostic(diagnostic.id, button);
-                
-                const price = getTarif(selectedPropertyType, selectedSize, diagnostic.id);
                 
                 button.innerHTML = `
                     <div class="flex items-center space-x-3">
-                        <div class="${diagnostic.color} w-10 h-10 rounded-full flex items-center justify-center text-white text-lg">
+                        <div class="${diagnostic.color} w-8 h-8 rounded-full flex items-center justify-center text-white text-sm">
                             ${diagnostic.icon}
                         </div>
-                        <span class="font-medium">${diagnostic.name}</span>
+                        <span class="font-medium text-sm">${diagnostic.name}</span>
                     </div>
                     <div class="text-right">
-                        <div class="font-semibold">${price}€</div>
-                        <div class="check-indicator w-5 h-5 rounded-full border-2 border-gray-300"></div>
+                        <div class="font-semibold text-sm">${price}€</div>
+                        <div class="check-indicator w-4 h-4 rounded-full border-2 border-gray-300"></div>
                     </div>
                 `;
                 
                 diagnosticsContainer.appendChild(button);
             });
-            
-            document.getElementById('diagnosticsSelection').classList.remove('hidden');
-            document.getElementById('calculateBtn').classList.remove('hidden');
         }
 
         // Toggle diagnostic selection
@@ -680,6 +758,7 @@
                 button.classList.remove('selected');
                 checkIndicator.style.backgroundColor = '';
                 checkIndicator.style.borderColor = '#d1d5db';
+                checkIndicator.innerHTML = '';
             } else {
                 selectedDiagnostics.push(diagnosticId);
                 button.classList.add('selected');
@@ -691,36 +770,11 @@
 
         // Récupération du tarif
         function getTarif(propertyType, size, diagnosticId) {
-            const tarifsReels = {
-                maison: {
-                    '2 pièces': { erp: 35, dpe: 103.50, amiante: 86.25, termites: 86.25, metrage: 97.75, gaz: 97.75, electricite: 80.50, plomb: 103.50 },
-                    '3 pièces': { erp: 35, dpe: 117, amiante: 97.50, termites: 97.50, metrage: 110.50, gaz: 110.50, electricite: 91, plomb: 117 },
-                    '4 pièces': { erp: 35, dpe: 126, amiante: 105, termites: 105, metrage: 119, gaz: 119, electricite: 98, plomb: 126 },
-                    '5 pièces': { erp: 35, dpe: 135, amiante: 112.50, termites: 112.50, metrage: 127.50, gaz: 127.50, electricite: 105, plomb: 135 },
-                    '6 pièces': { erp: 35, dpe: 180, amiante: 150, termites: 150, metrage: 170, gaz: 170, electricite: 140, plomb: 180 },
-                    '7 pièces': { erp: 35, dpe: 225, amiante: 187.50, termites: 187.50, metrage: 212.50, gaz: 212.50, electricite: 175, plomb: 225 }
-                },
-                appartement: {
-                    '1 pièce': { erp: 35, dpe: 90, amiante: 75, termites: 75, metrage: 85, gaz: 85, electricite: 70, plomb: 90 },
-                    '2 pièces': { erp: 35, dpe: 94.50, amiante: 78.75, termites: 78.75, metrage: 89.25, gaz: 89.25, electricite: 73.50, plomb: 94.50 },
-                    '3 pièces': { erp: 35, dpe: 99, amiante: 82.50, termites: 82.50, metrage: 93.50, gaz: 93.50, electricite: 77, plomb: 99 },
-                    '4 pièces': { erp: 35, dpe: 103.50, amiante: 86.25, termites: 86.25, metrage: 97.75, gaz: 97.75, electricite: 80.50, plomb: 103.50 },
-                    '5 pièces': { erp: 35, dpe: 112.50, amiante: 93.75, termites: 93.75, metrage: 106.25, gaz: 106.25, electricite: 87.50, plomb: 112.50 },
-                    '6 pièces': { erp: 35, dpe: 117, amiante: 97.50, termites: 97.50, metrage: 110.50, gaz: 110.50, electricite: 91, plomb: 117 },
-                    '7 pièces': { erp: 35, dpe: 126, amiante: 105, termites: 105, metrage: 119, gaz: 119, electricite: 98, plomb: 126 }
-                },
-                commerce: {
-                    'Petit commerce (<50m²)': { erp: 35, dpe: 117, amiante: 98, termites: 98, metrage: 115 },
-                    'Commerce moyen (50-200m²)': { erp: 35, dpe: 130, amiante: 110, termites: 110, metrage: 125 },
-                    'Grand commerce (>200m²)': { erp: 35, dpe: 210, amiante: 190, termites: 190, metrage: 200 }
-                }
-            };
-            
             return tarifsReels[propertyType]?.[size]?.[diagnosticId] || 0;
         }
 
-        // Calcul du devis avec l'interface mobile
-        function calculerDevisStyle() {
+        // Calcul du devis
+        function calculerDevis() {
             if (!selectedPropertyType || !selectedSize || selectedDiagnostics.length === 0) {
                 document.getElementById('resultat').innerHTML = '<p class="text-red-500 text-center">Veuillez sélectionner le type, la taille et au moins un diagnostic.</p>';
                 return;
@@ -736,14 +790,10 @@
                 details.push(`${diagnostic.name}: ${price}€`);
             });
             
-            // Système de remises réel
+            // Calcul des remises
             const nbDiagnostics = selectedDiagnostics.length;
             let remise = 0;
             let tauxRemise = 0;
-            
-            const remisesReelles = {
-                3: 7, 4: 13, 5: 28, 6: 32, 7: 34, 8: 40
-            };
             
             if (nbDiagnostics >= 3) {
                 tauxRemise = remisesReelles[Math.min(nbDiagnostics, 8)] || 0;
@@ -776,134 +826,7 @@
             document.getElementById('resultat').innerHTML = html;
         }
         
-        // Anciennes fonctions (gardées pour compatibilité mais inutilisées)
-        function calculerDevis() {
-            // Cette fonction n'est plus utilisée mais gardée pour éviter les erreurs
-            calculerDevisStyle();
-        }
-                else if (surface <= 100) tailleBien = '4 pièces';
-                else if (surface <= 130) tailleBien = '5 pièces';
-                else if (surface <= 160) tailleBien = '6 pièces';
-                else tailleBien = '7 pièces';
-            } else {
-                bienType = 'commerce';
-                if (surface < 50) tailleBien = 'Petit commerce (<50m²)';
-                else if (surface <= 200) tailleBien = 'Commerce moyen (50-200m²)';
-                else tailleBien = 'Grand commerce (>200m²)';
-            }
-            
-            // Grille tarifaire réelle de votre calculatrice (COMPLÈTE avec ERP et Métrage)
-            const tarifsReels = {
-                maison: {
-                    '2 pièces': { erp: 35, dpe: 103.50, amiante: 86.25, termites: 86.25, metrage: 97.75, gaz: 97.75, electricite: 80.50, plomb: 103.50 },
-                    '3 pièces': { erp: 35, dpe: 117, amiante: 97.50, termites: 97.50, metrage: 110.50, gaz: 110.50, electricite: 91, plomb: 117 },
-                    '4 pièces': { erp: 35, dpe: 126, amiante: 105, termites: 105, metrage: 119, gaz: 119, electricite: 98, plomb: 126 },
-                    '5 pièces': { erp: 35, dpe: 135, amiante: 112.50, termites: 112.50, metrage: 127.50, gaz: 127.50, electricite: 105, plomb: 135 },
-                    '6 pièces': { erp: 35, dpe: 180, amiante: 150, termites: 150, metrage: 170, gaz: 170, electricite: 140, plomb: 180 },
-                    '7 pièces': { erp: 35, dpe: 225, amiante: 187.50, termites: 187.50, metrage: 212.50, gaz: 212.50, electricite: 175, plomb: 225 }
-                },
-                appartement: {
-                    '1 pièce': { erp: 35, dpe: 90, amiante: 75, termites: 75, metrage: 85, gaz: 85, electricite: 70, plomb: 90 },
-                    '2 pièces': { erp: 35, dpe: 94.50, amiante: 78.75, termites: 78.75, metrage: 89.25, gaz: 89.25, electricite: 73.50, plomb: 94.50 },
-                    '3 pièces': { erp: 35, dpe: 99, amiante: 82.50, termites: 82.50, metrage: 93.50, gaz: 93.50, electricite: 77, plomb: 99 },
-                    '4 pièces': { erp: 35, dpe: 103.50, amiante: 86.25, termites: 86.25, metrage: 97.75, gaz: 97.75, electricite: 80.50, plomb: 103.50 },
-                    '5 pièces': { erp: 35, dpe: 112.50, amiante: 93.75, termites: 93.75, metrage: 106.25, gaz: 106.25, electricite: 87.50, plomb: 112.50 },
-                    '6 pièces': { erp: 35, dpe: 117, amiante: 97.50, termites: 97.50, metrage: 110.50, gaz: 110.50, electricite: 91, plomb: 117 },
-                    '7 pièces': { erp: 35, dpe: 126, amiante: 105, termites: 105, metrage: 119, gaz: 119, electricite: 98, plomb: 126 }
-                },
-                commerce: {
-                    'Petit commerce (<50m²)': { erp: 35, dpe: 117, amiante: 98, termites: 98, metrage: 115 },
-                    'Commerce moyen (50-200m²)': { erp: 35, dpe: 130, amiante: 110, termites: 110, metrage: 125 },
-                    'Grand commerce (>200m²)': { erp: 35, dpe: 210, amiante: 190, termites: 190, metrage: 200 }
-                }
-            };
-            
-            const tarifs = tarifsReels[bienType]?.[tailleBien] || {};
-            
-            if (dpe && tarifs.dpe) {
-                total += tarifs.dpe;
-                details.push(`DPE: ${tarifs.dpe}€`);
-            }
-            if (amiante && tarifs.amiante) {
-                total += tarifs.amiante;
-                details.push(`Amiante: ${tarifs.amiante}€`);
-            }
-            if (plomb && tarifs.plomb) {
-                total += tarifs.plomb;
-                details.push(`Plomb: ${tarifs.plomb}€`);
-            }
-            if (termites && tarifs.termites) {
-                total += tarifs.termites;
-                details.push(`Termites: ${tarifs.termites}€`);
-            }
-            if (gaz && tarifs.gaz) {
-                total += tarifs.gaz;
-                details.push(`Installation gaz: ${tarifs.gaz}€`);
-            }
-            if (electricite && tarifs.electricite) {
-                total += tarifs.electricite;
-                details.push(`Installation électrique: ${tarifs.electricite}€`);
-            }
-            if (erp && tarifs.erp) {
-                total += tarifs.erp;
-                details.push(`ERP: ${tarifs.erp}€`);
-            }
-            if (metrage && tarifs.metrage) {
-                total += tarifs.metrage;
-                details.push(`Métrage Loi Carrez: ${tarifs.metrage}€`);
-            }
-            
-            if (details.length === 0) {
-                document.getElementById('resultat').innerHTML = '<p class="text-red-500 text-center">Veuillez sélectionner au moins un diagnostic.</p>';
-                return;
-            }
-            
-            // Système de remises réel de votre calculatrice
-            const nbDiagnostics = details.length;
-            let remise = 0;
-            let tauxRemise = 0;
-            
-            const remisesReelles = {
-                3: 7,    // 7% pour 3 diagnostics
-                4: 13,   // 13% pour 4 diagnostics
-                5: 28,   // 28% pour 5 diagnostics
-                6: 32,   // 32% pour 6 diagnostics
-                7: 34,   // 34% pour 7 diagnostics
-                8: 40    // 40% pour 8+ diagnostics
-            };
-            
-            if (nbDiagnostics >= 3) {
-                tauxRemise = remisesReelles[Math.min(nbDiagnostics, 8)] || 0;
-                remise = total * (tauxRemise / 100);
-            }
-            
-            const totalFinal = total - remise;
-            
-            let html = `
-                <div class="space-y-4">
-                    <h4 class="font-semibold text-lg text-blue-600">Devis pour ${typeBien} de ${surface}m²</h4>
-                    <div class="space-y-2">
-                        ${details.map(detail => `<div class="flex justify-between border-b border-gray-200 pb-1"><span>${detail.split(':')[0]}:</span><span class="font-medium">${detail.split(':')[1]}</span></div>`).join('')}
-                    </div>
-                    <hr class="border-gray-300">
-                    <div class="flex justify-between"><span>Sous-total:</span><span class="font-medium">${total}€</span></div>
-                    ${remise > 0 ? `<div class="flex justify-between text-green-600"><span>Remise ${tauxRemise}% (${nbDiagnostics} diagnostics):</span><span class="font-medium">-${remise.toFixed(2)}€</span></div>` : ''}
-                    <div class="flex justify-between font-bold text-xl border-t-2 border-blue-600 pt-3">
-                        <span>Total:</span><span class="text-blue-600">${totalFinal.toFixed(2)}€</span>
-                    </div>
-                </div>
-                <div class="mt-6 p-4 bg-blue-50 rounded-lg">
-                    <p class="text-sm text-blue-800">
-                        <i class="fas fa-info-circle mr-2"></i>
-                        <strong>Version démo limitée :</strong> La version complète calcule tous les diagnostics avec vos tarifs personnalisés et génère un PDF professionnel !
-                    </p>
-                </div>
-            `;
-            
-            document.getElementById('resultat').innerHTML = html;
-        }
-        
-        // Navigation smooth scroll
+        // Navigation functions
         function scrollToDemo() {
             document.getElementById('demo').scrollIntoView({ behavior: 'smooth', block: 'start' });
         }
@@ -912,9 +835,9 @@
             document.getElementById('prix').scrollIntoView({ behavior: 'smooth', block: 'start' });
         }
         
-        // Fonction d'achat (temporaire - sera remplacée par Stripe)
+        // Fonction d'achat
         function acheterMaintenant() {
-            alert('🚀 Fonctionnalité d\'achat en cours d\'intégration!\n\nProchaine étape: Intégration du paiement Stripe.\n\nPour l\'instant, contactez-nous à: support@calculdiag.fr');
+            alert('🚀 Fonctionnalité d\'achat en cours d\'intégration!\n\nProchaine étape: Intégration du paiement Stripe.\n\nPour l\'instant, contactez-nous à: contact@calculdiag.fr');
         }
         
         // Smooth scroll pour tous les liens d'ancrage
@@ -928,7 +851,7 @@
             });
         });
         
-        // Animation au scroll (optionnel)
+        // Animation au scroll
         const observerOptions = {
             threshold: 0.1,
             rootMargin: '0px 0px -50px 0px'
@@ -953,6 +876,8 @@
                 observer.observe(el);
             });
         });
+
+        console.log('Calcul-diag chargé avec succès ! 🚀');
     </script>
 </body>
 </html>
