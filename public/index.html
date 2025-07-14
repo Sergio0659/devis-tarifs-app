@@ -3,878 +3,619 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>CalculDiag - Application Mobile</title>
-    
-    <!-- PWA Configuration -->
-    <link rel="manifest" href="manifest.json">
-    <meta name="theme-color" content="#1e40af">
-    <meta name="background-color" content="#0f172a">
-    
-    <!-- Apple specific -->
-    <meta name="apple-mobile-web-app-capable" content="yes">
-    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-    <meta name="apple-mobile-web-app-title" content="CalculDiag">
-    
-    <!-- React and styling -->
-    <script src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
-    <script src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
-    <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+    <title>Calcul-diag - L'app indispensable pour vos devis diagnostics</title>
+    <meta name="description" content="Application mobile pour calculer instantanément le prix de vos diagnostics immobiliers, générer des devis sur mesure avec remises automatiques.">
     <script src="https://cdn.tailwindcss.com"></script>
-    
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
     <style>
-        /* Masquer la barre d'adresse sur mobile */
-        @media (display-mode: standalone) {
-            body {
-                padding-top: env(safe-area-inset-top);
-                padding-bottom: env(safe-area-inset-bottom);
-            }
-        }
-        
-        /* Optimisations mobile */
-        * {
-            -webkit-tap-highlight-color: transparent;
-            touch-action: manipulation;
-        }
-        
-        body {
-            overscroll-behavior: none;
-            -webkit-overflow-scrolling: touch;
-        }
-        
-        /* Animation pour les boutons */
-        .btn-mobile {
-            transition: all 0.2s ease;
-        }
-        
-        .btn-mobile:active {
-            transform: scale(0.95);
-        }
+        .gradient-bg { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); }
+        .card-hover { transition: transform 0.3s ease, box-shadow 0.3s ease; }
+        .card-hover:hover { transform: translateY(-5px); box-shadow: 0 20px 40px rgba(0,0,0,0.1); }
     </style>
 </head>
-<body>
-    <div id="root"></div>
-    
-    <script type="text/babel">
-        const { useState } = React;
-
-        // Icônes
-        const Home = ({ size = 20, className }) => (
-            <svg className={className} width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                <path d="m3 9 9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/>
-                <polyline points="9,22 9,12 15,12 15,22"/>
-            </svg>
-        );
-        
-        const Building = ({ size = 20, className }) => (
-            <svg className={className} width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                <rect width="16" height="20" x="4" y="2" rx="2" ry="2"/>
-                <path d="M9 22v-4h6v4"/>
-                <path d="M8 6h.01"/>
-                <path d="M16 6h.01"/>
-                <path d="M12 6h.01"/>
-                <path d="M12 10h.01"/>
-                <path d="M12 14h.01"/>
-                <path d="M16 10h.01"/>
-                <path d="M16 14h.01"/>
-                <path d="M8 10h.01"/>
-                <path d="M8 14h.01"/>
-            </svg>
-        );
-        
-        const Store = ({ size = 20, className }) => (
-            <svg className={className} width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                <path d="m2 7 4.41-4.41A2 2 0 0 1 7.83 2h8.34a2 2 0 0 1 1.42.59L22 7"/>
-                <path d="M4 12v8a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-8"/>
-                <path d="M15 22v-4a2 2 0 0 0-2-2h-2a2 2 0 0 0-2 2v4"/>
-                <path d="M2 7h20"/>
-                <path d="M22 7v3a2 2 0 0 1-2 2v0a2 2 0 0 1-2-2V7"/>
-                <path d="M18 7v3a2 2 0 0 1-2 2v0a2 2 0 0 1-2-2V7"/>
-                <path d="M14 7v3a2 2 0 0 1-2 2v0a2 2 0 0 1-2-2V7"/>
-                <path d="M10 7v3a2 2 0 0 1-2 2v0a2 2 0 0 1-2-2V7"/>
-                <path d="M6 7v3a2 2 0 0 1-2 2v0a2 2 0 0 1-2-2V7"/>
-            </svg>
-        );
-        
-        const ArrowLeft = ({ size = 20, className }) => (
-            <svg className={className} width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                <path d="m12 19-7-7 7-7"/>
-                <path d="M19 12H5"/>
-            </svg>
-        );
-        
-        const User = ({ size = 20, className }) => (
-            <svg className={className} width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/>
-                <circle cx="12" cy="7" r="4"/>
-            </svg>
-        );
-        
-        const Calculator = ({ size = 20, className }) => (
-            <svg className={className} width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                <rect width="16" height="20" x="4" y="2" rx="2"/>
-                <line x1="8" x2="16" y1="6" y2="6"/>
-                <line x1="16" x2="16" y1="14" y2="18"/>
-                <path d="M16 10h.01"/>
-                <path d="M12 10h.01"/>
-                <path d="M8 10h.01"/>
-                <path d="M12 14h.01"/>
-                <path d="M8 14h.01"/>
-                <path d="M8 18h.01"/>
-                <path d="M12 18h.01"/>
-            </svg>
-        );
-        
-        // Icônes pour diagnostics
-        const Thermometer = ({ size = 20, className }) => (
-            <svg className={className} width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                <path d="M14 4v10.54a4 4 0 1 1-4 0V4a2 2 0 0 1 4 0Z"/>
-            </svg>
-        );
-        
-        const Shield = ({ size = 20, className }) => (
-            <svg className={className} width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10"/>
-            </svg>
-        );
-        
-        const Droplets = ({ size = 20, className }) => (
-            <svg className={className} width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                <path d="M7 16.3c2.2 0 4-1.83 4-4.05 0-1.16-.57-2.26-1.71-3.19S7.29 6.75 7 5.3c-.29 1.45-1.14 2.84-2.29 3.76S3 11.1 3 12.25c0 2.22 1.8 4.05 4 4.05z"/>
-                <path d="M12.56 6.6A10.97 10.97 0 0 0 14 3.02c.5 2.5 2.04 4.6 4.14 6.18s3.85 2.67 3.85 4.03a6.06 6.06 0 0 1-6 6.06c-3.71 0-6.72-3.35-6.72-7.54"/>
-            </svg>
-        );
-        
-        const Bug = ({ size = 20, className }) => (
-            <svg className={className} width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                <rect width="8" height="14" x="8" y="6" rx="4"/>
-                <path d="m19 7-3 2"/>
-                <path d="m5 7 3 2"/>
-                <path d="m19 19-3-2"/>
-                <path d="m5 19 3-2"/>
-                <path d="M20 12h-4"/>
-                <path d="M4 12h4"/>
-                <path d="m9 2 3 3 3-3"/>
-            </svg>
-        );
-        
-        const Wind = ({ size = 20, className }) => (
-            <svg className={className} width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                <path d="M17.7 7.7a2.5 2.5 0 1 1 1.8 4.3H2"/>
-                <path d="M9.6 4.6A2 2 0 1 1 11 8H2"/>
-                <path d="M12.6 19.4A2 2 0 1 0 14 16H2"/>
-            </svg>
-        );
-        
-        const Zap = ({ size = 20, className }) => (
-            <svg className={className} width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                <polygon points="13,2 3,14 12,14 11,22 21,10 12,10"/>
-            </svg>
-        );
-        
-        const Eye = ({ size = 20, className }) => (
-            <svg className={className} width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                <path d="M2 12s3-7 10-7 10 7 10 7-3 7-10 7-10-7-10-7Z"/>
-                <circle cx="12" cy="12" r="3"/>
-            </svg>
-        );
-        
-        const Wrench = ({ size = 20, className }) => (
-            <svg className={className} width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                <path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z"/>
-            </svg>
-        );
-
-        const DiagnosticApp = () => {
-          const [currentStep, setCurrentStep] = useState('home');
-          const [selectedType, setSelectedType] = useState('');
-          const [selectedSize, setSelectedSize] = useState('');
-          const [selectedDiagnostics, setSelectedDiagnostics] = useState([]);
-          
-          // États pour l'administration
-          const [showAdminLogin, setShowAdminLogin] = useState(false);
-          const [showAdminPanel, setShowAdminPanel] = useState(false);
-          const [adminCurrentView, setAdminCurrentView] = useState('menu');
-          const [isAuthenticated, setIsAuthenticated] = useState(false);
-          
-          // Configuration modifiable
-          const [companyName, setCompanyName] = useState('CalculDiag');
-          const [adminPassword, setAdminPassword] = useState('admin123');
-          const [passwordInput, setPasswordInput] = useState('');
-          
-          // États temporaires pour l'édition
-          const [tempCompanyName, setTempCompanyName] = useState('');
-          const [tempPassword, setTempPassword] = useState('');
-          const [tempPriceConfig, setTempPriceConfig] = useState(null);
-
-          // Configuration des prix
-          const [priceConfig, setPriceConfig] = useState({
-            maison: {
-              '2 pièces': { erp: 35, amiante: 86.25, termites: 86.25, metrage: 97.75, dpe: 103.50, gaz: 97.75, electricite: 80.50, plomb: 103.50 },
-              '3 pièces': { erp: 35, amiante: 97.50, termites: 97.50, metrage: 110.50, dpe: 117, gaz: 110.50, electricite: 91, plomb: 117 },
-              '4 pièces': { erp: 35, amiante: 105, termites: 105, metrage: 119, dpe: 126, gaz: 119, electricite: 98, plomb: 126 },
-              '5 pièces': { erp: 35, amiante: 112.50, termites: 112.50, metrage: 127.50, dpe: 135, gaz: 127.50, electricite: 105, plomb: 135 },
-              '6 pièces': { erp: 35, amiante: 150, termites: 150, metrage: 170, dpe: 180, gaz: 170, electricite: 140, plomb: 180 },
-              '7 pièces': { erp: 35, amiante: 187.50, termites: 187.50, metrage: 212.50, dpe: 225, gaz: 212.50, electricite: 175, plomb: 225 }
-            },
-            appartement: {
-              '1 pièce': { erp: 35, amiante: 75, termites: 75, metrage: 85, dpe: 90, gaz: 85, electricite: 70, plomb: 90 },
-              '2 pièces': { erp: 35, amiante: 78.75, termites: 78.75, metrage: 89.25, dpe: 94.50, gaz: 89.25, electricite: 73.50, plomb: 94.50 },
-              '3 pièces': { erp: 35, amiante: 82.50, termites: 82.50, metrage: 93.50, dpe: 99, gaz: 93.50, electricite: 77, plomb: 99 },
-              '4 pièces': { erp: 35, amiante: 86.25, termites: 86.25, metrage: 97.75, dpe: 103.50, gaz: 97.75, electricite: 80.50, plomb: 103.50 },
-              '5 pièces': { erp: 35, amiante: 93.75, termites: 93.75, metrage: 106.25, dpe: 112.50, gaz: 106.25, electricite: 87.50, plomb: 112.50 },
-              '6 pièces': { erp: 35, amiante: 97.50, termites: 97.50, metrage: 110.50, dpe: 117.00, gaz: 110.50, electricite: 91.00, plomb: 117.00 },
-              '7 pièces': { erp: 35, amiante: 105.00, termites: 105.00, metrage: 119.00, dpe: 126.00, gaz: 119.00, electricite: 98.00, plomb: 126.00 }
-            },
-            commerce: {
-              'Petit commerce (<50m²)': { erp: 35, amiante: 98, termites: 98, metrage: 115, dpe: 117 },
-              'Commerce moyen (50-200m²)': { erp: 35, amiante: 110, termites: 110, metrage: 125, dpe: 130 },
-              'Grand commerce (>200m²)': { erp: 35, amiante: 190, termites: 190, metrage: 200, dpe: 210 }
-            },
-            remises: {
-              3: 0.07,
-              4: 0.13,
-              5: 0.28,
-              6: 0.32,
-              7: 0.34,
-              8: 0.40
-            }
-          });
-
-          const diagnostics = [
-            { id: 'dpe', name: 'DPE', icon: Thermometer, color: 'bg-green-500' },
-            { id: 'amiante', name: 'Amiante', icon: Shield, color: 'bg-red-500' },
-            { id: 'plomb', name: 'Plomb', icon: Droplets, color: 'bg-blue-500' },
-            { id: 'termites', name: 'Termites', icon: Bug, color: 'bg-yellow-500' },
-            { id: 'gaz', name: 'Gaz', icon: Wind, color: 'bg-orange-500' },
-            { id: 'electricite', name: 'Électricité', icon: Zap, color: 'bg-purple-500' },
-            { id: 'erp', name: 'ERP', icon: Eye, color: 'bg-indigo-500' },
-            { id: 'metrage', name: 'Loi Carrez', icon: Wrench, color: 'bg-teal-500' }
-          ];
-
-          const propertyTypes = [
-            { id: 'maison', name: 'Maison', icon: Home, gradient: 'from-blue-600 to-blue-800' },
-            { id: 'appartement', name: 'Appartement', icon: Building, gradient: 'from-green-600 to-green-800' },
-            { id: 'commerce', name: 'Commerce', icon: Store, gradient: 'from-purple-600 to-purple-800' }
-          ];
-
-          const sizes = {
-            maison: ['2 pièces', '3 pièces', '4 pièces', '5 pièces', '6 pièces', '7 pièces'],
-            appartement: ['1 pièce', '2 pièces', '3 pièces', '4 pièces', '5 pièces', '6 pièces', '7 pièces'],
-            commerce: ['Petit commerce (<50m²)', 'Commerce moyen (50-200m²)', 'Grand commerce (>200m²)']
-          };
-
-          const availableDiagnostics = {
-            maison: ['erp', 'dpe', 'amiante', 'termites', 'gaz', 'electricite', 'plomb', 'metrage'],
-            appartement: ['erp', 'dpe', 'amiante', 'termites', 'gaz', 'electricite', 'plomb', 'metrage'],
-            commerce: ['erp', 'dpe', 'amiante', 'termites', 'metrage']
-          };
-
-          // Fonctions
-          const handleDiagnosticToggle = (diagnosticId) => {
-            setSelectedDiagnostics(prev => 
-              prev.includes(diagnosticId) 
-                ? prev.filter(id => id !== diagnosticId)
-                : [...prev, diagnosticId]
-            );
-          };
-
-          const calculatePricing = () => {
-            const prices = priceConfig[selectedType]?.[selectedSize] || {};
-            const subtotal = selectedDiagnostics.reduce((total, diagnosticId) => {
-              return total + (prices[diagnosticId] || 0);
-            }, 0);
-            
-            const discount = priceConfig.remises[selectedDiagnostics.length] || 0;
-            const discountAmount = Math.round(subtotal * discount);
-            const total = Math.round(subtotal - discountAmount);
-            
-            return { subtotal, discount, discountAmount, total };
-          };
-
-          const resetApp = () => {
-            setCurrentStep('home');
-            setSelectedType('');
-            setSelectedSize('');
-            setSelectedDiagnostics([]);
-            setShowAdminLogin(false);
-            setShowAdminPanel(false);
-          };
-
-          // Fonctions admin
-          const handleLogin = () => {
-            if (passwordInput === adminPassword) {
-              setIsAuthenticated(true);
-              setShowAdminLogin(false);
-              setShowAdminPanel(true);
-              setAdminCurrentView('menu');
-              setTempCompanyName(companyName);
-              setTempPassword(adminPassword);
-              setPasswordInput('');
-            } else {
-              alert('Mot de passe incorrect');
-              setPasswordInput('');
-            }
-          };
-
-          const handleLogout = () => {
-            setIsAuthenticated(false);
-            setShowAdminPanel(false);
-            setAdminCurrentView('menu');
-            setTempCompanyName('');
-            setTempPassword('');
-            setTempPriceConfig(null);
-          };
-
-          const updatePrice = (bienType, sizeType, diagnostic, newPrice) => {
-            const updated = { ...tempPriceConfig };
-            updated[bienType][sizeType][diagnostic] = parseFloat(newPrice) || 0;
-            setTempPriceConfig(updated);
-          };
-
-          const updateDiscount = (diagnosticCount, newDiscount) => {
-            const updated = { ...tempPriceConfig };
-            updated.remises[diagnosticCount] = parseFloat(newDiscount) / 100 || 0;
-            setTempPriceConfig(updated);
-          };
-
-          // Interface de connexion admin
-          if (showAdminLogin) {
-            return (
-              <div className="min-h-screen bg-gradient-to-br from-slate-900 to-slate-800 flex items-center justify-center p-4">
-                <div className="bg-white rounded-3xl shadow-2xl p-8 w-full max-w-md">
-                  <div className="text-center mb-8">
-                    <div className="w-20 h-20 bg-gradient-to-br from-blue-600 to-purple-600 rounded-full flex items-center justify-center mx-auto mb-4">
-                      <User className="w-10 h-10 text-white" />
-                    </div>
-                    <h2 className="text-2xl font-bold text-gray-800">Accès Administrateur</h2>
-                  </div>
-                  
-                  <div className="space-y-4">
-                    <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-2">Mot de passe</label>
-                      <input 
-                        type="password" 
-                        value={passwordInput}
-                        onChange={(e) => setPasswordInput(e.target.value)}
-                        onKeyPress={(e) => e.key === 'Enter' && handleLogin()}
-                        className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                        placeholder="Entrez le mot de passe"
-                        autoFocus
-                      />
-                    </div>
-                    <button 
-                      onClick={handleLogin}
-                      className="w-full bg-gradient-to-r from-blue-600 to-purple-600 text-white py-3 rounded-xl font-semibold hover:from-blue-700 hover:to-purple-700 transition-all btn-mobile"
-                    >
-                      Se connecter
-                    </button>
-                  </div>
-                  
-                  <button 
-                    onClick={() => {
-                      setShowAdminLogin(false);
-                      setPasswordInput('');
-                    }}
-                    className="w-full mt-4 text-gray-600 hover:text-gray-800 transition-colors"
-                  >
-                    Retour
-                  </button>
+<body class="bg-gray-50">
+    <!-- Navigation -->
+    <nav class="bg-white shadow-lg sticky top-0 z-50">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex justify-between h-16">
+                <div class="flex items-center">
+                    <h1 class="text-2xl font-bold text-blue-600">Calcul-diag</h1>
                 </div>
-              </div>
-            );
-          }
-
-          // Panneau d'administration
-          if (showAdminPanel) {
-            return (
-              <div className="min-h-screen bg-gradient-to-br from-slate-900 to-slate-800 p-4">
-                <div className="max-w-md mx-auto">
-                  <div className="bg-white rounded-3xl shadow-2xl p-6">
-                    
-                    {/* Header admin avec navigation */}
-                    <div className="text-center mb-6">
-                      <div className="flex items-center justify-between mb-4">
-                        {adminCurrentView !== 'menu' && (
-                          <button
-                            onClick={() => setAdminCurrentView('menu')}
-                            className="p-2 rounded-full bg-gray-100 hover:bg-gray-200 transition-colors"
-                          >
-                            <ArrowLeft className="w-5 h-5 text-gray-600" />
-                          </button>
-                        )}
-                        <div className="flex-1">
-                          <div className="w-16 h-16 bg-gradient-to-br from-green-600 to-blue-600 rounded-full flex items-center justify-center mx-auto mb-2">
-                            <User className="w-8 h-8 text-white" />
-                          </div>
-                          <h2 className="text-xl font-bold text-gray-800">Administration</h2>
-                        </div>
-                        <button
-                          onClick={handleLogout}
-                          className="p-2 rounded-full bg-gray-100 hover:bg-gray-200 transition-colors"
-                        >
-                          <span className="text-gray-600 text-sm">✕</span>
-                        </button>
-                      </div>
-                    </div>
-
-                    {/* Menu principal admin */}
-                    {adminCurrentView === 'menu' && (
-                      <div className="space-y-3">
-                        <button
-                          onClick={() => {
-                            setTempCompanyName(companyName);
-                            setAdminCurrentView('company');
-                          }}
-                          className="w-full p-4 bg-blue-50 hover:bg-blue-100 rounded-xl transition-colors text-left"
-                        >
-                          <div className="font-semibold text-blue-800">Nom de l'entreprise</div>
-                          <div className="text-sm text-blue-600">{companyName}</div>
-                        </button>
-
-                        <button
-                          onClick={() => {
-                            setTempPassword(adminPassword);
-                            setAdminCurrentView('password');
-                          }}
-                          className="w-full p-4 bg-green-50 hover:bg-green-100 rounded-xl transition-colors text-left"
-                        >
-                          <div className="font-semibold text-green-800">Mot de passe admin</div>
-                          <div className="text-sm text-green-600">Modifier le mot de passe</div>
-                        </button>
-
-                        <button
-                          onClick={() => {
-                            setTempPriceConfig(JSON.parse(JSON.stringify(priceConfig)));
-                            setAdminCurrentView('prices');
-                          }}
-                          className="w-full p-4 bg-purple-50 hover:bg-purple-100 rounded-xl transition-colors text-left"
-                        >
-                          <div className="font-semibold text-purple-800">Prix des diagnostics</div>
-                          <div className="text-sm text-purple-600">Modifier les tarifs</div>
-                        </button>
-
-                        <button
-                          onClick={() => {
-                            setTempPriceConfig(JSON.parse(JSON.stringify(priceConfig)));
-                            setAdminCurrentView('discounts');
-                          }}
-                          className="w-full p-4 bg-orange-50 hover:bg-orange-100 rounded-xl transition-colors text-left"
-                        >
-                          <div className="font-semibold text-orange-800">Remises</div>
-                          <div className="text-sm text-orange-600">Modifier les pourcentages</div>
-                        </button>
-                      </div>
-                    )}
-
-                    {/* Modification nom entreprise */}
-                    {adminCurrentView === 'company' && (
-                      <div className="space-y-4">
-                        <h3 className="text-lg font-semibold text-gray-800 text-center">Nom de l'entreprise</h3>
-                        <input
-                          type="text"
-                          value={tempCompanyName}
-                          onChange={(e) => setTempCompanyName(e.target.value)}
-                          className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-500"
-                          placeholder="Nom de votre entreprise"
-                        />
-                        <button
-                          onClick={() => {
-                            setCompanyName(tempCompanyName);
-                            alert('Nom de l\'entreprise sauvegardé !');
-                            setAdminCurrentView('menu');
-                          }}
-                          className="w-full bg-blue-600 hover:bg-blue-700 text-white py-3 rounded-xl font-semibold transition-colors"
-                        >
-                          Sauvegarder
-                        </button>
-                      </div>
-                    )}
-
-                    {/* Modification mot de passe */}
-                    {adminCurrentView === 'password' && (
-                     <div className="space-y-4">
-                        <h3 className="text-lg font-semibold text-gray-800 text-center">Mot de passe admin</h3>
-                        <input
-                          type="password"
-                          value={tempPassword}
-                          onChange={(e) => setTempPassword(e.target.value)}
-                          className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-green-500"
-                          placeholder="Nouveau mot de passe"
-                        />
-                        <button
-                          onClick={() => {
-                            setAdminPassword(tempPassword);
-                            alert('Mot de passe sauvegardé !');
-                            setAdminCurrentView('menu');
-                          }}
-                          className="w-full bg-green-600 hover:bg-green-700 text-white py-3 rounded-xl font-semibold transition-colors"
-                        >
-                          Sauvegarder
-                        </button>
-                      </div>
-                    )}
-
-                    {/* Modification prix */}
-                    {adminCurrentView === 'prices' && tempPriceConfig && (
-                      <div className="space-y-4">
-                        <h3 className="text-lg font-semibold text-gray-800 text-center">Prix des diagnostics</h3>
-                        <div className="max-h-80 overflow-y-auto space-y-4">
-                          {Object.entries(tempPriceConfig).map(([bienType, types]) => {
-                            if (bienType === 'remises') return null;
-                            
-                            return (
-                              <div key={bienType} className="border border-gray-200 rounded-lg p-3">
-                                <h4 className="font-semibold text-gray-700 mb-2 capitalize text-center">{bienType}</h4>
-                                {Object.entries(types).map(([sizeType, diagnostics]) => (
-                                  <div key={sizeType} className="mb-3">
-                                    <h5 className="text-sm font-medium text-gray-600 mb-2">{sizeType}</h5>
-                                    <div className="grid grid-cols-2 gap-1">
-                                      {Object.entries(diagnostics).map(([diagnostic, price]) => (
-                                        <div key={diagnostic} className="text-center">
-                                          <label className="text-xs text-gray-500 block">
-                                            {diagnostic.toUpperCase()}
-                                          </label>
-                                          <input
-                                            type="number"
-                                            step="0.25"
-                                            value={price}
-                                            onChange={(e) => updatePrice(bienType, sizeType, diagnostic, e.target.value)}
-                                            className="w-full px-1 py-1 text-xs border border-gray-300 rounded text-center"
-                                          />
-                                        </div>
-                                      ))}
-                                    </div>
-                                  </div>
-                                ))}
-                              </div>
-                            );
-                          })}
-                        </div>
-                        <button
-                          onClick={() => {
-                            setPriceConfig(tempPriceConfig);
-                            alert('Prix sauvegardés !');
-                            setAdminCurrentView('menu');
-                          }}
-                          className="w-full bg-purple-600 hover:bg-purple-700 text-white py-3 rounded-xl font-semibold transition-colors"
-                        >
-                          Sauvegarder les prix
-                        </button>
-                      </div>
-                    )}
-
-                    {/* Modification remises */}
-                    {adminCurrentView === 'discounts' && tempPriceConfig && (
-                      <div className="space-y-4">
-                        <h3 className="text-lg font-semibold text-gray-800 text-center">Remises</h3>
-                        <div className="grid grid-cols-2 gap-3">
-                          {Object.entries(tempPriceConfig.remises).map(([count, discount]) => (
-                            <div key={count} className="text-center">
-                              <label className="text-sm text-gray-600 block mb-1">
-                                {count} diagnostics
-                              </label>
-                              <div className="flex items-center">
-                                <input
-                                  type="number"
-                                  step="1"
-                                  min="0"
-                                  max="50"
-                                  value={Math.round(discount * 100)}
-                                  onChange={(e) => updateDiscount(count, e.target.value)}
-                                  className="w-full px-2 py-2 border border-gray-300 rounded-l text-center"
-                                />
-                                <span className="bg-gray-100 px-2 py-2 border border-l-0 border-gray-300 rounded-r text-sm">%</span>
-                              </div>
-                            </div>
-                          ))}
-                        </div>
-                        <button
-                          onClick={() => {
-                            setPriceConfig(tempPriceConfig);
-                            alert('Remises sauvegardées !');
-                            setAdminCurrentView('menu');
-                          }}
-                          className="w-full bg-orange-600 hover:bg-orange-700 text-white py-3 rounded-xl font-semibold transition-colors"
-                        >
-                          Sauvegarder les remises
-                        </button>
-                      </div>
-                    )}
-
-                  </div>
+                <div class="flex items-center space-x-4">
+                    <a href="#demo" class="text-gray-600 hover:text-blue-600">Démo</a>
+                    <a href="#prix" class="text-gray-600 hover:text-blue-600">Prix</a>
+                    <button onclick="scrollToAchat()" class="bg-blue-600 text-white px-6 py-2 rounded-lg hover:bg-blue-700 transition">
+                        Acheter maintenant
+                    </button>
                 </div>
-              </div>
-            );
-          }
-
-          // Application principale
-          return (
-            <div className="min-h-screen bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900">
-              {/* Header */}
-              <div className="bg-white/10 backdrop-blur-md border-b border-white/20">
-                <div className="px-6 py-4 flex items-center justify-between">
-                  {currentStep !== 'home' && (
-                    <button 
-                      onClick={() => {
-                        if (currentStep === 'size') {
-                          setCurrentStep('home');
-                          setSelectedType('');
-                        } else if (currentStep === 'diagnostics') {
-                          setCurrentStep('size');
-                          setSelectedDiagnostics([]);
-                        } else if (currentStep === 'devis') {
-                          setCurrentStep('diagnostics');
-                        }
-                      }}
-                      className="flex items-center space-x-2 text-white hover:text-blue-300 transition-colors btn-mobile"
-                    >
-                      <ArrowLeft className="w-5 h-5" />
-                      <span>Retour</span>
-                    </button>
-                  )}
-                  
-                  <div className="flex-1 text-center">
-                    <h1 className="text-xl font-bold text-white">{companyName}</h1>
-                  </div>
-                  
-                  {currentStep === 'home' && (
-                    <button 
-                      onClick={() => setShowAdminLogin(true)}
-                      className="p-2 rounded-full bg-white/20 hover:bg-white/30 transition-colors btn-mobile"
-                    >
-                      <User className="w-5 h-5 text-white" />
-                    </button>
-                  )}
-                </div>
-              </div>
-
-              {/* Content */}
-              <div className="px-6 py-8">
-                {/* Step 1: Property Type Selection */}
-                {currentStep === 'home' && (
-                  <div className="space-y-6">
-                    <div className="text-center">
-                      <p className="text-gray-300 text-lg">Calculateur de devis diagnostics immobiliers</p>
-                    </div>
-                    
-                    <div className="space-y-3">
-                      <h3 className="text-xl font-semibold text-white text-center mb-4">Sélectionnez le type de bien</h3>
-                      
-                      {propertyTypes.map((type) => {
-                        const IconComponent = type.icon;
-                        return (
-                          <button
-                            key={type.id}
-                            onClick={() => {
-                              setSelectedType(type.id);
-                              setCurrentStep('size');
-                            }}
-                            className={`w-full p-5 rounded-2xl bg-gradient-to-r ${type.gradient} text-white shadow-lg hover:shadow-xl transform hover:scale-105 transition-all duration-300 btn-mobile`}
-                          >
-                            <div className="flex items-center space-x-4">
-                              <div className="w-14 h-14 bg-white/20 rounded-full flex items-center justify-center">
-                                <IconComponent className="w-7 h-7" />
-                              </div>
-                              <div className="text-left">
-                                <h4 className="text-lg font-semibold">{type.name}</h4>
-                                <p className="text-white/80 text-sm">Diagnostics adaptés</p>
-                              </div>
-                            </div>
-                          </button>
-                        );
-                      })}
-                    </div>
-                  </div>
-                )}
-
-                {/* Step 2: Size Selection */}
-                {currentStep === 'size' && (
-                  <div className="space-y-6">
-                    <div className="text-center">
-                      <h2 className="text-2xl font-bold text-white mb-2">
-                        {propertyTypes.find(t => t.id === selectedType)?.name}
-                      </h2>
-                      <p className="text-gray-300">Choisissez la taille du bien</p>
-                    </div>
-                    
-                    <div className="grid grid-cols-2 gap-4">
-                      {sizes[selectedType]?.map((size) => (
-                        <button
-                          key={size}
-                          onClick={() => {
-                            setSelectedSize(size);
-                            setCurrentStep('diagnostics');
-                          }}
-                          className="p-4 rounded-xl bg-white/10 backdrop-blur-md border border-white/20 text-white hover:bg-white/20 transition-all duration-300 transform hover:scale-105 btn-mobile"
-                        >
-                          <div className="text-center">
-                            <div className="text-lg font-semibold">{size}</div>
-                          </div>
-                        </button>
-                      ))}
-                    </div>
-                  </div>
-                )}
-
-                {/* Step 3: Diagnostics Selection */}
-                {currentStep === 'diagnostics' && (
-                  <div className="space-y-6">
-                    <div className="text-center">
-                      <h2 className="text-2xl font-bold text-white mb-2">Sélectionnez les diagnostics</h2>
-                      <p className="text-gray-300">
-                        {propertyTypes.find(t => t.id === selectedType)?.name} - {selectedSize}
-                      </p>
-                    </div>
-                    
-                    <div className="grid gap-3">
-                      {availableDiagnostics[selectedType]?.map((diagnosticId) => {
-                        const diagnostic = diagnostics.find(d => d.id === diagnosticId);
-                        if (!diagnostic) return null;
-                        
-                        const IconComponent = diagnostic.icon;
-                        const isSelected = selectedDiagnostics.includes(diagnosticId);
-                        const price = priceConfig[selectedType]?.[selectedSize]?.[diagnosticId] || 0;
-                        
-                        return (
-                          <button
-                            key={diagnosticId}
-                            onClick={() => handleDiagnosticToggle(diagnosticId)}
-                            className={`p-4 rounded-xl border-2 transition-all duration-300 btn-mobile ${
-                              isSelected 
-                                ? 'bg-white/20 border-white/40 backdrop-blur-md' 
-                                : 'bg-white/5 border-white/20 hover:bg-white/10'
-                            }`}
-                          >
-                            <div className="flex items-center justify-between">
-                              <div className="flex items-center space-x-3">
-                                <div className={`w-10 h-10 ${diagnostic.color} rounded-full flex items-center justify-center`}>
-                                  <IconComponent className="w-5 h-5 text-white" />
-                                </div>
-                                <span className="text-white font-medium">{diagnostic.name}</span>
-                              </div>
-                              <div className="text-right">
-                                <div className="text-white font-semibold">{price}€</div>
-                                <div className={`w-5 h-5 rounded-full border-2 ${
-                                  isSelected ? 'bg-green-500 border-green-500' : 'border-white/40'
-                                }`}>
-                                  {isSelected && (
-                                    <div className="w-full h-full flex items-center justify-center">
-                                      <div className="w-2 h-2 bg-white rounded-full"></div>
-                                    </div>
-                                  )}
-                                </div>
-                              </div>
-                            </div>
-                          </button>
-                        );
-                      })}
-                    </div>
-                    
-                    {selectedDiagnostics.length > 0 && (
-                      <div className="bg-gradient-to-r from-green-600 to-blue-600 rounded-2xl p-6 text-white">
-                        <div className="flex items-center justify-between mb-4">
-                          <div className="flex items-center space-x-3">
-                            <Calculator className="w-6 h-6" />
-                            <span className="text-lg font-semibold">Diagnostics sélectionnés</span>
-                          </div>
-                          <span className="text-lg font-bold">{selectedDiagnostics.length} diagnostic{selectedDiagnostics.length > 1 ? 's' : ''}</span>
-                        </div>
-                        
-                        <button 
-                          onClick={() => setCurrentStep('devis')}
-                          className="w-full bg-white/20 hover:bg-white/30 text-white py-3 rounded-xl font-semibold transition-colors btn-mobile"
-                        >
-                          Calculer le devis
-                        </button>
-                      </div>
-                    )}
-                  </div>
-                )}
-
-                {/* Step 4: Devis Final */}
-                {currentStep === 'devis' && (
-                  <div className="space-y-6">
-                    <div className="text-center">
-                      <h2 className="text-2xl font-bold text-white mb-2">Devis détaillé</h2>
-                      <p className="text-gray-300">
-                        {propertyTypes.find(t => t.id === selectedType)?.name} - {selectedSize}
-                      </p>
-                    </div>
-                    
-                    <div className="bg-white/10 backdrop-blur-md rounded-2xl p-6 border border-white/20">
-                      <h3 className="text-xl font-semibold text-white mb-4">Détail des prestations</h3>
-                      
-                      <div className="space-y-3 mb-6">
-                        {selectedDiagnostics.map(diagnosticId => {
-                          const diagnostic = diagnostics.find(d => d.id === diagnosticId);
-                          const price = priceConfig[selectedType]?.[selectedSize]?.[diagnosticId] || 0;
-                          const IconComponent = diagnostic?.icon;
-                          
-                          return (
-                            <div key={diagnosticId} className="flex items-center justify-between py-2 border-b border-white/10">
-                              <div className="flex items-center space-x-3">
-                                <div className={`w-8 h-8 ${diagnostic?.color} rounded-full flex items-center justify-center`}>
-                                  {IconComponent && <IconComponent className="w-4 h-4 text-white" />}
-                                </div>
-                                <span className="text-white font-medium">{diagnostic?.name}</span>
-                              </div>
-                              <span className="text-white font-semibold">{price.toFixed(2)}€</span>
-                            </div>
-                          );
-                        })}
-                      </div>
-                      
-                      <div className="border-t border-white/20 pt-4 space-y-3">
-                        {(() => {
-                          const { subtotal, discount, discountAmount, total } = calculatePricing();
-                          return (
-                            <>
-                              <div className="flex justify-between text-white">
-                                <span>Sous-total</span>
-                                <span className="font-semibold">{subtotal.toFixed(2)}€</span>
-                              </div>
-                              
-                              {selectedDiagnostics.length >= 3 && discount > 0 && (
-                                <div className="flex justify-between text-green-400">
-                                  <span>Remise ({selectedDiagnostics.length} diagnostics) - {Math.round(discount * 100)}%</span>
-                                  <span className="font-semibold">-{discountAmount}€</span>
-                                </div>
-                              )}
-                              
-                              <div className="flex justify-between text-xl font-bold text-white pt-3 border-t border-white/20">
-                                <span>Total TTC</span>
-                                <span className="text-green-400">{total}€</span>
-                              </div>
-                            </>
-                          );
-                        })()}
-                      </div>
-                    </div>
-                    
-                    <button 
-                      onClick={resetApp}
-                      className="w-full bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white py-3 rounded-xl font-semibold transition-all btn-mobile"
-                    >
-                      Nouveau devis
-                    </button>
-                  </div>
-                )}
-              </div>
             </div>
-          );
-        };
+        </div>
+    </nav>
 
-        // Rendu de l'application
-        ReactDOM.render(<DiagnosticApp />, document.getElementById('root'));
+    <!-- Hero Section -->
+    <section class="gradient-bg text-white py-20">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
+            <h1 class="text-5xl font-bold mb-6">
+                Simplifiez vos devis de diagnostic immobilier
+            </h1>
+            <p class="text-xl mb-8 max-w-3xl mx-auto">
+                L'application mobile qui calcule instantanément le prix de vos diagnostics, 
+                génère des devis sur mesure et applique automatiquement vos remises selon le volume.
+            </p>
+            <div class="flex flex-col sm:flex-row gap-4 justify-center">
+                <button onclick="scrollToDemo()" class="bg-white text-blue-600 px-8 py-4 rounded-lg text-lg font-semibold hover:bg-gray-100 transition">
+                    <i class="fas fa-play mr-2"></i>Essayer la démo
+                </button>
+                <button onclick="scrollToAchat()" class="border-2 border-white text-white px-8 py-4 rounded-lg text-lg font-semibold hover:bg-white hover:text-blue-600 transition">
+                    Acheter - 49€ <span class="text-sm">(licence unique)</span>
+                </button>
+            </div>
+        </div>
+    </section>
 
-        // Service Worker pour PWA
-        if ('serviceWorker' in navigator) {
-          window.addEventListener('load', () => {
-            navigator.serviceWorker.register('sw.js')
-              .then((registration) => console.log('SW registered'))
-              .catch((registrationError) => console.log('SW registration failed'));
-          });
+    <!-- Problèmes/Solutions -->
+    <section class="py-16 bg-white">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="text-center mb-12">
+                <h2 class="text-3xl font-bold text-gray-900 mb-4">
+                    Fini les calculs complexes et les erreurs de devis
+                </h2>
+                <p class="text-xl text-gray-600">Pour les diagnostiqueurs et agents immobiliers professionnels</p>
+            </div>
+            
+            <div class="grid md:grid-cols-2 gap-12 items-center">
+                <div>
+                    <div class="space-y-6">
+                        <div class="flex items-start space-x-4">
+                            <div class="bg-red-100 p-3 rounded-full">
+                                <i class="fas fa-clock text-red-600"></i>
+                            </div>
+                            <div>
+                                <h3 class="font-semibold text-gray-900">Perte de temps sur les calculs</h3>
+                                <p class="text-gray-600">Excel, calculatrice, recherche de tarifs...</p>
+                            </div>
+                        </div>
+                        <div class="flex items-start space-x-4">
+                            <div class="bg-red-100 p-3 rounded-full">
+                                <i class="fas fa-exclamation-triangle text-red-600"></i>
+                            </div>
+                            <div>
+                                <h3 class="font-semibold text-gray-900">Erreurs de calcul coûteuses</h3>
+                                <p class="text-gray-600">Oubli de remises, mauvais tarifs...</p>
+                            </div>
+                        </div>
+                        <div class="flex items-start space-x-4">
+                            <div class="bg-red-100 p-3 rounded-full">
+                                <i class="fas fa-file-alt text-red-600"></i>
+                            </div>
+                            <div>
+                                <h3 class="font-semibold text-gray-900">Devis peu professionnels</h3>
+                                <p class="text-gray-600">Présentation brouillonne, pas de détail...</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div>
+                    <div class="bg-gradient-to-br from-blue-50 to-purple-50 p-8 rounded-xl">
+                        <h3 class="text-2xl font-bold text-gray-900 mb-4">
+                            <i class="fas fa-mobile-alt text-blue-600 mr-2"></i>
+                            Avec Calcul-diag
+                        </h3>
+                        <ul class="space-y-3">
+                            <li class="flex items-center">
+                                <i class="fas fa-check text-green-600 mr-3"></i>
+                                <span>Calcul instantané sur mobile</span>
+                            </li>
+                            <li class="flex items-center">
+                                <i class="fas fa-check text-green-600 mr-3"></i>
+                                <span>Remises automatiques selon volume</span>
+                            </li>
+                            <li class="flex items-center">
+                                <i class="fas fa-check text-green-600 mr-3"></i>
+                                <span>Devis professionnel en 30 secondes</span>
+                            </li>
+                            <li class="flex items-center">
+                                <i class="fas fa-check text-green-600 mr-3"></i>
+                                <span>Prix unitaires et forfaits</span>
+                            </li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Démo Section -->
+    <section id="demo" class="py-16 bg-gray-50">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="text-center mb-12">
+                <h2 class="text-3xl font-bold text-gray-900 mb-4">
+                    Testez Calcul-diag gratuitement
+                </h2>
+                <p class="text-xl text-gray-600">Version démo limitée - La version complète est disponible sur mobile</p>
+            </div>
+            
+            <!-- Calculatrice démo intégrée -->
+            <div class="max-w-4xl mx-auto">
+                <div class="bg-white rounded-xl shadow-lg p-8">
+                    <div class="grid md:grid-cols-2 gap-8">
+                        <div>
+                            <h3 class="text-xl font-semibold mb-6">Calculez votre devis diagnostic</h3>
+                            
+                            <div class="space-y-4">
+                                <div>
+                                    <label class="block text-sm font-medium text-gray-700 mb-2">Surface du bien (m²)</label>
+                                    <input type="number" id="surface" class="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500" placeholder="Ex: 120" min="1">
+                                </div>
+                                
+                                <div>
+                                    <label class="block text-sm font-medium text-gray-700 mb-2">Type de bien</label>
+                                    <select id="typeBien" class="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
+                                        <option value="">Sélectionner...</option>
+                                        <option value="appartement">Appartement</option>
+                                        <option value="maison">Maison individuelle</option>
+                                        <option value="local">Local commercial</option>
+                                    </select>
+                                </div>
+                                
+                                <div>
+                                    <label class="block text-sm font-medium text-gray-700 mb-2">Diagnostics souhaités</label>
+                                    <div class="space-y-2">
+                                        <label class="flex items-center">
+                                            <input type="checkbox" id="dpe" class="mr-2 text-blue-600"> DPE (Diagnostic de Performance Énergétique)
+                                        </label>
+                                        <label class="flex items-center">
+                                            <input type="checkbox" id="amiante" class="mr-2 text-blue-600"> Amiante
+                                        </label>
+                                        <label class="flex items-center">
+                                            <input type="checkbox" id="plomb" class="mr-2 text-blue-600"> Plomb
+                                        </label>
+                                        <label class="flex items-center">
+                                            <input type="checkbox" id="termites" class="mr-2 text-blue-600"> Termites
+                                        </label>
+                                        <label class="flex items-center">
+                                            <input type="checkbox" id="gaz" class="mr-2 text-blue-600"> Installation gaz
+                                        </label>
+                                        <label class="flex items-center">
+                                            <input type="checkbox" id="electricite" class="mr-2 text-blue-600"> Installation électrique
+                                        </label>
+                                    </div>
+                                </div>
+                                
+                                <button onclick="calculerDevis()" class="w-full bg-blue-600 text-white py-3 rounded-lg hover:bg-blue-700 transition">
+                                    Calculer le devis
+                                </button>
+                            </div>
+                        </div>
+                        
+                        <div>
+                            <h3 class="text-xl font-semibold mb-6">Résultat du devis</h3>
+                            <div id="resultat" class="bg-gray-50 p-6 rounded-lg min-h-64">
+                                <p class="text-gray-500 text-center">Remplissez le formulaire pour voir votre devis</p>
+                            </div>
+                            
+                            <div class="mt-6 p-4 bg-yellow-50 border border-yellow-200 rounded-lg">
+                                <div class="flex items-center">
+                                    <i class="fas fa-info-circle text-yellow-600 mr-2"></i>
+                                    <span class="text-sm text-yellow-800">
+                                        <strong>Version démo :</strong> Calculs limités. 
+                                        La version complète inclut tous les diagnostics, remises automatiques et export PDF.
+                                    </span>
+                                </div>
+                            </div>
+                            
+                            <button onclick="scrollToAchat()" class="w-full mt-4 bg-green-600 text-white py-3 rounded-lg hover:bg-green-700 transition">
+                                <i class="fas fa-rocket mr-2"></i>Obtenir la version complète - 49€
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Fonctionnalités -->
+    <section class="py-16 bg-white">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="text-center mb-12">
+                <h2 class="text-3xl font-bold text-gray-900 mb-4">
+                    Toutes les fonctionnalités dont vous avez besoin
+                </h2>
+            </div>
+            
+            <div class="grid md:grid-cols-3 gap-8">
+                <div class="card-hover bg-white p-6 rounded-xl shadow-lg border">
+                    <div class="bg-blue-100 w-12 h-12 rounded-lg flex items-center justify-center mb-4">
+                        <i class="fas fa-calculator text-blue-600 text-xl"></i>
+                    </div>
+                    <h3 class="text-xl font-semibold mb-3">Calcul automatique</h3>
+                    <p class="text-gray-600">Prix à l'unité et forfaits selon surface, type de bien et diagnostics sélectionnés.</p>
+                </div>
+                
+                <div class="card-hover bg-white p-6 rounded-xl shadow-lg border">
+                    <div class="bg-green-100 w-12 h-12 rounded-lg flex items-center justify-center mb-4">
+                        <i class="fas fa-percentage text-green-600 text-xl"></i>
+                    </div>
+                    <h3 class="text-xl font-semibold mb-3">Remises intelligentes</h3>
+                    <p class="text-gray-600">Application automatique des remises selon le nombre de diagnostics commandés.</p>
+                </div>
+                
+                <div class="card-hover bg-white p-6 rounded-xl shadow-lg border">
+                    <div class="bg-purple-100 w-12 h-12 rounded-lg flex items-center justify-center mb-4">
+                        <i class="fas fa-file-pdf text-purple-600 text-xl"></i>
+                    </div>
+                    <h3 class="text-xl font-semibold mb-3">Devis professionnel</h3>
+                    <p class="text-gray-600">Génération de devis détaillés, prêts à envoyer à vos clients.</p>
+                </div>
+                
+                <div class="card-hover bg-white p-6 rounded-xl shadow-lg border">
+                    <div class="bg-orange-100 w-12 h-12 rounded-lg flex items-center justify-center mb-4">
+                        <i class="fas fa-mobile-alt text-orange-600 text-xl"></i>
+                    </div>
+                    <h3 class="text-xl font-semibold mb-3">Application mobile</h3>
+                    <p class="text-gray-600">Utilisable partout, même sans connexion internet. Compatible iPhone et Android.</p>
+                </div>
+                
+                <div class="card-hover bg-white p-6 rounded-xl shadow-lg border">
+                    <div class="bg-red-100 w-12 h-12 rounded-lg flex items-center justify-center mb-4">
+                        <i class="fas fa-clock text-red-600 text-xl"></i>
+                    </div>
+                    <h3 class="text-xl font-semibold mb-3">Gain de temps</h3>
+                    <p class="text-gray-600">Devis en 30 secondes au lieu de 15 minutes de calculs manuels.</p>
+                </div>
+                
+                <div class="card-hover bg-white p-6 rounded-xl shadow-lg border">
+                    <div class="bg-indigo-100 w-12 h-12 rounded-lg flex items-center justify-center mb-4">
+                        <i class="fas fa-sync text-indigo-600 text-xl"></i>
+                    </div>
+                    <h3 class="text-xl font-semibold mb-3">Mises à jour incluses</h3>
+                    <p class="text-gray-600">Nouveaux tarifs et réglementations intégrés automatiquement.</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Prix et achat -->
+    <section id="prix" class="py-16 bg-gray-50">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="text-center mb-12">
+                <h2 class="text-3xl font-bold text-gray-900 mb-4">
+                    Un investissement qui se rentabilise dès le premier devis
+                </h2>
+                <p class="text-xl text-gray-600">Achat unique - Pas d'abonnement</p>
+            </div>
+            
+            <div class="max-w-lg mx-auto">
+                <div class="bg-white rounded-xl shadow-xl border-2 border-blue-500 p-8 text-center">
+                    <div class="bg-blue-500 text-white px-4 py-2 rounded-full text-sm font-semibold mb-6 inline-block">
+                        OFFRE DE LANCEMENT
+                    </div>
+                    
+                    <h3 class="text-2xl font-bold text-gray-900 mb-4">Calcul-diag</h3>
+                    <div class="mb-6">
+                        <span class="text-5xl font-bold text-blue-600">49€</span>
+                        <span class="text-gray-500 line-through text-xl ml-2">79€</span>
+                    </div>
+                    
+                    <ul class="text-left space-y-3 mb-8">
+                        <li class="flex items-center">
+                            <i class="fas fa-check text-green-600 mr-3"></i>
+                            <span>Application mobile complète</span>
+                        </li>
+                        <li class="flex items-center">
+                            <i class="fas fa-check text-green-600 mr-3"></i>
+                            <span>Tous les types de diagnostics</span>
+                        </li>
+                        <li class="flex items-center">
+                            <i class="fas fa-check text-green-600 mr-3"></i>
+                            <span>Calculs et remises automatiques</span>
+                        </li>
+                        <li class="flex items-center">
+                            <i class="fas fa-check text-green-600 mr-3"></i>
+                            <span>Export PDF des devis</span>
+                        </li>
+                        <li class="flex items-center">
+                            <i class="fas fa-check text-green-600 mr-3"></i>
+                            <span>Mises à jour incluses à vie</span>
+                        </li>
+                        <li class="flex items-center">
+                            <i class="fas fa-check text-green-600 mr-3"></i>
+                            <span>Support par email</span>
+                        </li>
+                    </ul>
+                    
+                    <button onclick="acheterMaintenant()" class="w-full bg-blue-600 text-white py-4 rounded-lg text-lg font-semibold hover:bg-blue-700 transition mb-4">
+                        <i class="fas fa-download mr-2"></i>
+                        Acheter maintenant - 49€
+                    </button>
+                    
+                    <p class="text-sm text-gray-500">
+                        <i class="fas fa-lock mr-1"></i>
+                        Paiement sécurisé • Téléchargement immédiat
+                    </p>
+                </div>
+            </div>
+            
+            <div class="text-center mt-12">
+                <div class="inline-flex items-center space-x-8 text-sm text-gray-600">
+                    <div class="flex items-center">
+                        <i class="fas fa-shield-alt text-green-600 mr-2"></i>
+                        <span>Paiement sécurisé</span>
+                    </div>
+                    <div class="flex items-center">
+                        <i class="fas fa-download text-blue-600 mr-2"></i>
+                        <span>Accès immédiat</span>
+                    </div>
+                    <div class="flex items-center">
+                        <i class="fas fa-headset text-purple-600 mr-2"></i>
+                        <span>Support inclus</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Témoignages fictifs (en attendant les vrais) -->
+    <section class="py-16 bg-white">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="text-center mb-12">
+                <h2 class="text-3xl font-bold text-gray-900 mb-4">
+                    Ils ont adopté Calcul-diag
+                </h2>
+            </div>
+            
+            <div class="grid md:grid-cols-3 gap-8">
+                <div class="bg-gray-50 p-6 rounded-xl">
+                    <div class="flex items-center mb-4">
+                        <div class="w-12 h-12 bg-blue-500 rounded-full flex items-center justify-center text-white font-bold">
+                            JM
+                        </div>
+                        <div class="ml-4">
+                            <h4 class="font-semibold">Jean-Michel D.</h4>
+                            <p class="text-sm text-gray-600">Diagnostiqueur indépendant</p>
+                        </div>
+                    </div>
+                    <p class="text-gray-700 italic">"Un gain de temps énorme ! Je fais mes devis directement chez le client en 2 minutes."</p>
+                </div>
+                
+                <div class="bg-gray-50 p-6 rounded-xl">
+                    <div class="flex items-center mb-4">
+                        <div class="w-12 h-12 bg-green-500 rounded-full flex items-center justify-center text-white font-bold">
+                            SL
+                        </div>
+                        <div class="ml-4">
+                            <h4 class="font-semibold">Sophie L.</h4>
+                            <p class="text-sm text-gray-600">Agent immobilier</p>
+                        </div>
+                    </div>
+                    <p class="text-gray-700 italic">"Mes clients apprécient la transparence des prix et la rapidité des devis."</p>
+                </div>
+                
+                <div class="bg-gray-50 p-6 rounded-xl">
+                    <div class="flex items-center mb-4">
+                        <div class="w-12 h-12 bg-purple-500 rounded-full flex items-center justify-center text-white font-bold">
+                            PR
+                        </div>
+                        <div class="ml-4">
+                            <h4 class="font-semibold">Pierre R.</h4>
+                            <p class="text-sm text-gray-600">Cabinet de diagnostic</p>
+                        </div>
+                    </div>
+                    <p class="text-gray-700 italic">"Les remises automatiques me font gagner de l'argent sur les gros chantiers."</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- FAQ -->
+    <section class="py-16 bg-gray-50">
+        <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="text-center mb-12">
+                <h2 class="text-3xl font-bold text-gray-900 mb-4">Questions fréquentes</h2>
+            </div>
+            
+            <div class="space-y-6">
+                <div class="bg-white border border-gray-200 rounded-lg p-6">
+                    <h3 class="text-lg font-semibold mb-2">Sur quels appareils fonctionne Calcul-diag ?</h3>
+                    <p class="text-gray-600">L'application est compatible iPhone et Android. Installation simple via un lien de téléchargement sécurisé.</p>
+                </div>
+                
+                <div class="bg-white border border-gray-200 rounded-lg p-6">
+                    <h3 class="text-lg font-semibold mb-2">Y a-t-il des frais cachés ou un abonnement ?</h3>
+                    <p class="text-gray-600">Non, c'est un achat unique à 49€. Aucun abonnement, les mises à jour sont incluses à vie.</p>
+                </div>
+                
+                <div class="bg-white border border-gray-200 rounded-lg p-6">
+                    <h3 class="text-lg font-semibold mb-2">Comment personnaliser mes tarifs ?</h3>
+                    <p class="text-gray-600">L'application inclut les tarifs moyens du marché, avec possibilité d'ajustement selon vos grilles tarifaires.</p>
+                </div>
+                
+                <div class="bg-white border border-gray-200 rounded-lg p-6">
+                    <h3 class="text-lg font-semibold mb-2">Que se passe-t-il après l'achat ?</h3>
+                    <p class="text-gray-600">Vous recevez immédiatement un email avec le lien de téléchargement et les instructions d'installation.</p>
+                </div>
+                
+                <div class="bg-white border border-gray-200 rounded-lg p-6">
+                    <h3 class="text-lg font-semibold mb-2">L'application fonctionne-t-elle sans internet ?</h3>
+                    <p class="text-gray-600">Oui, une fois installée, l'application fonctionne entièrement hors ligne pour tous les calculs.</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer class="bg-gray-900 text-white py-12">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="grid md:grid-cols-3 gap-8">
+                <div>
+                    <h3 class="text-xl font-bold mb-4">Calcul-diag</h3>
+                    <p class="text-gray-400">L'application mobile indispensable pour les professionnels du diagnostic immobilier.</p>
+                </div>
+                <div>
+                    <h4 class="font-semibold mb-4">Liens utiles</h4>
+                    <ul class="space-y-2 text-gray-400">
+                        <li><a href="#demo" class="hover:text-white">Démo</a></li>
+                        <li><a href="#prix" class="hover:text-white">Prix</a></li>
+                        <li><a href="mailto:support@calculdiag.fr" class="hover:text-white">Support</a></li>
+                        <li><a href="mailto:contact@calculdiag.fr" class="hover:text-white">Contact</a></li>
+                    </ul>
+                </div>
+                <div>
+                    <h4 class="font-semibold mb-4">Contact</h4>
+                    <div class="text-gray-400 space-y-2">
+                        <p><i class="fas fa-envelope mr-2"></i>support@calculdiag.fr</p>
+                        <p><i class="fas fa-globe mr-2"></i>www.calculdiag.fr</p>
+                    </div>
+                </div>
+            </div>
+            <div class="border-t border-gray-800 mt-8 pt-8 text-center text-gray-400">
+                <p>&copy; 2025 Calcul-diag. Tous droits réservés.</p>
+            </div>
+        </div>
+    </footer>
+
+    <script>
+        // Calculatrice démo
+        function calculerDevis() {
+            const surface = parseFloat(document.getElementById('surface').value);
+            const typeBien = document.getElementById('typeBien').value;
+            const dpe = document.getElementById('dpe').checked;
+            const amiante = document.getElementById('amiante').checked;
+            const plomb = document.getElementById('plomb').checked;
+            const termites = document.getElementById('termites').checked;
+            const gaz = document.getElementById('gaz').checked;
+            const electricite = document.getElementById('electricite').checked;
+            
+            if (!surface || !typeBien) {
+                document.getElementById('resultat').innerHTML = '<p class="text-red-500 text-center">Veuillez remplir tous les champs obligatoires.</p>';
+                return;
+            }
+            
+            // Tarifs de base (exemple réaliste)
+            let total = 0;
+            let details = [];
+            
+            if (dpe) {
+                const prixDpe = typeBien === 'appartement' ? 120 : (typeBien === 'maison' ? 150 : 180);
+                total += prixDpe;
+                details.push(`DPE: ${prixDpe}€`);
+            }
+            if (amiante) {
+                const prixAmiante = surface < 50 ? 90 : (surface < 100 ? 120 : 150);
+                total += prixAmiante;
+                details.push(`Amiante: ${prixAmiante}€`);
+            }
+            if (plomb) {
+                const prixPlomb = surface < 50 ? 80 : (surface < 100 ? 100 : 130);
+                total += prixPlomb;
+                details.push(`Plomb: ${prixPlomb}€`);
+            }
+            if (termites) {
+                const prixTermites = surface < 50 ? 85 : (surface < 100 ? 110 : 140);
+                total += prixTermites;
+                details.push(`Termites: ${prixTermites}€`);
+            }
+            if (gaz) {
+                const prixGaz = 70;
+                total += prixGaz;
+                details.push(`Installation gaz: ${prixGaz}€`);
+            }
+            if (electricite) {
+                const prixElec = 75;
+                total += prixElec;
+                details.push(`Installation électrique: ${prixElec}€`);
+            }
+            
+            if (details.length === 0) {
+                document.getElementById('resultat').innerHTML = '<p class="text-red-500 text-center">Veuillez sélectionner au moins un diagnostic.</p>';
+                return;
+            }
+            
+            // Remise démo si plus de 2 diagnostics
+            const nbDiagnostics = details.length;
+            let remise = 0;
+            let tauxRemise = 0;
+            if (nbDiagnostics >= 3) {
+                tauxRemise = nbDiagnostics >= 5 ? 20 : 15; // 20% pour 5+ diagnostics, 15% pour 3-4
+                remise = total * (tauxRemise / 100);
+            }
+            
+            const totalFinal = total - remise;
+            
+            let html = `
+                <div class="space-y-4">
+                    <h4 class="font-semibold text-lg text-blue-600">Devis pour ${typeBien} de ${surface}m²</h4>
+                    <div class="space-y-2">
+                        ${details.map(detail => `<div class="flex justify-between border-b border-gray-200 pb-1"><span>${detail.split(':')[0]}:</span><span class="font-medium">${detail.split(':')[1]}</span></div>`).join('')}
+                    </div>
+                    <hr class="border-gray-300">
+                    <div class="flex justify-between"><span>Sous-total:</span><span class="font-medium">${total}€</span></div>
+                    ${remise > 0 ? `<div class="flex justify-between text-green-600"><span>Remise ${tauxRemise}% (${nbDiagnostics} diagnostics):</span><span class="font-medium">-${remise.toFixed(2)}€</span></div>` : ''}
+                    <div class="flex justify-between font-bold text-xl border-t-2 border-blue-600 pt-3">
+                        <span>Total:</span><span class="text-blue-600">${totalFinal.toFixed(2)}€</span>
+                    </div>
+                </div>
+                <div class="mt-6 p-4 bg-blue-50 rounded-lg">
+                    <p class="text-sm text-blue-800">
+                        <i class="fas fa-info-circle mr-2"></i>
+                        <strong>Version démo limitée :</strong> La version complète calcule tous les diagnostics avec vos tarifs personnalisés et génère un PDF professionnel !
+                    </p>
+                </div>
+            `;
+            
+            document.getElementById('resultat').innerHTML = html;
         }
+        
+        // Navigation smooth scroll
+        function scrollToDemo() {
+            document.getElementById('demo').scrollIntoView({ behavior: 'smooth', block: 'start' });
+        }
+        
+        function scrollToAchat() {
+            document.getElementById('prix').scrollIntoView({ behavior: 'smooth', block: 'start' });
+        }
+        
+        // Fonction d'achat (temporaire - sera remplacée par Stripe)
+        function acheterMaintenant() {
+            alert('🚀 Fonctionnalité d\'achat en cours d\'intégration!\n\nProchaine étape: Intégration du paiement Stripe.\n\nPour l\'instant, contactez-nous à: support@calculdiag.fr');
+        }
+        
+        // Smooth scroll pour tous les liens d'ancrage
+        document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+            anchor.addEventListener('click', function (e) {
+                e.preventDefault();
+                const target = document.querySelector(this.getAttribute('href'));
+                if (target) {
+                    target.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                }
+            });
+        });
+        
+        // Animation au scroll (optionnel)
+        const observerOptions = {
+            threshold: 0.1,
+            rootMargin: '0px 0px -50px 0px'
+        };
+        
+        const observer = new IntersectionObserver((entries) => {
+            entries.forEach(entry => {
+                if (entry.isIntersecting) {
+                    entry.target.style.opacity = '1';
+                    entry.target.style.transform = 'translateY(0)';
+                }
+            });
+        }, observerOptions);
+        
+        // Observer tous les éléments avec animation
+        document.addEventListener('DOMContentLoaded', () => {
+            const animatedElements = document.querySelectorAll('.card-hover');
+            animatedElements.forEach(el => {
+                el.style.opacity = '0';
+                el.style.transform = 'translateY(20px)';
+                el.style.transition = 'opacity 0.6s ease, transform 0.6s ease';
+                observer.observe(el);
+            });
+        });
     </script>
 </body>
 </html>
