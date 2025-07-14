@@ -11,6 +11,47 @@
         .gradient-bg { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); }
         .card-hover { transition: transform 0.3s ease, box-shadow 0.3s ease; }
         .card-hover:hover { transform: translateY(-5px); box-shadow: 0 20px 40px rgba(0,0,0,0.1); }
+        
+        /* Styles pour la démo mobile */
+        .property-btn {
+            border-color: #e5e7eb;
+            background-color: #f9fafb;
+        }
+        .property-btn.selected {
+            border-color: #3b82f6;
+            background-color: #eff6ff;
+        }
+        .property-btn:hover {
+            border-color: #9ca3af;
+        }
+        .size-btn {
+            padding: 12px;
+            border: 2px solid #e5e7eb;
+            background-color: #f9fafb;
+            border-radius: 12px;
+            transition: all 0.3s ease;
+            font-weight: 500;
+        }
+        .size-btn.selected {
+            border-color: #3b82f6;
+            background-color: #eff6ff;
+            color: #1d4ed8;
+        }
+        .size-btn:hover {
+            border-color: #9ca3af;
+        }
+        .diagnostic-btn {
+            border: 2px solid #e5e7eb;
+            background-color: #f9fafb;
+            transition: all 0.3s ease;
+        }
+        .diagnostic-btn.selected {
+            border-color: #3b82f6;
+            background-color: #eff6ff;
+        }
+        .diagnostic-btn:hover {
+            border-color: #9ca3af;
+        }
     </style>
 </head>
 <body class="bg-gray-50">
@@ -135,60 +176,82 @@
                 <p class="text-xl text-gray-600">Version démo limitée - La version complète est disponible sur mobile</p>
             </div>
             
-            <!-- Calculatrice démo intégrée -->
+            <!-- Calculatrice démo intégrée - Style mobile identique -->
             <div class="max-w-4xl mx-auto">
                 <div class="bg-white rounded-xl shadow-lg p-8">
                     <div class="grid md:grid-cols-2 gap-8">
                         <div>
                             <h3 class="text-xl font-semibold mb-6">Calculez votre devis diagnostic</h3>
                             
-                            <div class="space-y-4">
+                            <div class="space-y-6">
+                                <!-- Sélection du type de bien -->
                                 <div>
-                                    <label class="block text-sm font-medium text-gray-700 mb-2">Surface du bien (m²)</label>
-                                    <input type="number" id="surface" class="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500" placeholder="Ex: 120" min="1">
-                                </div>
-                                
-                                <div>
-                                    <label class="block text-sm font-medium text-gray-700 mb-2">Type de bien</label>
-                                    <select id="typeBien" class="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
-                                        <option value="">Sélectionner...</option>
-                                        <option value="appartement">Appartement</option>
-                                        <option value="maison">Maison individuelle</option>
-                                        <option value="local">Local commercial</option>
-                                    </select>
-                                </div>
-                                
-                                <div>
-                                    <label class="block text-sm font-medium text-gray-700 mb-2">Diagnostics souhaités</label>
+                                    <label class="block text-sm font-medium text-gray-700 mb-3">Type de bien</label>
                                     <div class="space-y-2">
-                                        <label class="flex items-center">
-                                            <input type="checkbox" id="dpe" class="mr-2 text-blue-600"> DPE (Diagnostic de Performance Énergétique)
-                                        </label>
-                                        <label class="flex items-center">
-                                            <input type="checkbox" id="amiante" class="mr-2 text-blue-600"> Amiante
-                                        </label>
-                                        <label class="flex items-center">
-                                            <input type="checkbox" id="plomb" class="mr-2 text-blue-600"> Plomb
-                                        </label>
-                                        <label class="flex items-center">
-                                            <input type="checkbox" id="termites" class="mr-2 text-blue-600"> Termites
-                                        </label>
-                                        <label class="flex items-center">
-                                            <input type="checkbox" id="gaz" class="mr-2 text-blue-600"> Installation gaz
-                                        </label>
-                                        <label class="flex items-center">
-                                            <input type="checkbox" id="electricite" class="mr-2 text-blue-600"> Installation électrique
-                                        </label>
-                                        <label class="flex items-center">
-                                            <input type="checkbox" id="erp" class="mr-2 text-blue-600"> ERP (État des Risques et Pollutions)
-                                        </label>
-                                        <label class="flex items-center">
-                                            <input type="checkbox" id="metrage" class="mr-2 text-blue-600"> Métrage Loi Carrez
-                                        </label>
+                                        <button type="button" onclick="selectPropertyType('appartement')" 
+                                                class="property-btn w-full p-4 rounded-xl border-2 transition-all duration-300 flex items-center space-x-3" 
+                                                data-type="appartement">
+                                            <div class="w-10 h-10 bg-green-500 rounded-full flex items-center justify-center">
+                                                <svg class="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                    <rect width="16" height="20" x="4" y="2" rx="2" ry="2"/>
+                                                    <path d="M9 22v-4h6v4"/>
+                                                    <path d="M8 6h.01"/>
+                                                    <path d="M16 6h.01"/>
+                                                    <path d="M12 6h.01"/>
+                                                    <path d="M12 10h.01"/>
+                                                    <path d="M12 14h.01"/>
+                                                    <path d="M16 10h.01"/>
+                                                    <path d="M16 14h.01"/>
+                                                    <path d="M8 10h.01"/>
+                                                    <path d="M8 14h.01"/>
+                                                </svg>
+                                            </div>
+                                            <span class="font-medium">Appartement</span>
+                                        </button>
+                                        <button type="button" onclick="selectPropertyType('maison')" 
+                                                class="property-btn w-full p-4 rounded-xl border-2 transition-all duration-300 flex items-center space-x-3" 
+                                                data-type="maison">
+                                            <div class="w-10 h-10 bg-blue-500 rounded-full flex items-center justify-center">
+                                                <svg class="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                    <path d="m3 9 9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/>
+                                                    <polyline points="9,22 9,12 15,12 15,22"/>
+                                                </svg>
+                                            </div>
+                                            <span class="font-medium">Maison</span>
+                                        </button>
+                                        <button type="button" onclick="selectPropertyType('commerce')" 
+                                                class="property-btn w-full p-4 rounded-xl border-2 transition-all duration-300 flex items-center space-x-3" 
+                                                data-type="commerce">
+                                            <div class="w-10 h-10 bg-purple-500 rounded-full flex items-center justify-center">
+                                                <svg class="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                    <path d="m2 7 4.41-4.41A2 2 0 0 1 7.83 2h8.34a2 2 0 0 1 1.42.59L22 7"/>
+                                                    <path d="M4 12v8a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-8"/>
+                                                    <path d="M15 22v-4a2 2 0 0 0-2-2h-2a2 2 0 0 0-2 2v4"/>
+                                                    <path d="M2 7h20"/>
+                                                </svg>
+                                            </div>
+                                            <span class="font-medium">Commerce</span>
+                                        </button>
+                                    </div>
+                                </div>
+
+                                <!-- Sélection de la taille (affiché après sélection du type) -->
+                                <div id="sizeSelection" class="hidden">
+                                    <label class="block text-sm font-medium text-gray-700 mb-3">Taille du bien</label>
+                                    <div id="sizeButtons" class="grid grid-cols-2 gap-2">
+                                        <!-- Les boutons de taille seront générés par JavaScript -->
+                                    </div>
+                                </div>
+
+                                <!-- Sélection des diagnostics (affiché après sélection de la taille) -->
+                                <div id="diagnosticsSelection" class="hidden">
+                                    <label class="block text-sm font-medium text-gray-700 mb-3">Diagnostics souhaités</label>
+                                    <div id="diagnosticsButtons" class="space-y-2">
+                                        <!-- Les boutons de diagnostics seront générés par JavaScript -->
                                     </div>
                                 </div>
                                 
-                                <button onclick="calculerDevis()" class="w-full bg-blue-600 text-white py-3 rounded-lg hover:bg-blue-700 transition">
+                                <button onclick="calculerDevisStyle()" class="w-full bg-blue-600 text-white py-3 rounded-lg hover:bg-blue-700 transition hidden" id="calculateBtn">
                                     Calculer le devis
                                 </button>
                             </div>
@@ -481,43 +544,243 @@
     </footer>
 
     <script>
-        // Calculatrice démo
-        function calculerDevis() {
-            const surface = parseFloat(document.getElementById('surface').value);
-            const typeBien = document.getElementById('typeBien').value;
-            const dpe = document.getElementById('dpe').checked;
-            const amiante = document.getElementById('amiante').checked;
-            const plomb = document.getElementById('plomb').checked;
-            const termites = document.getElementById('termites').checked;
-            const gaz = document.getElementById('gaz').checked;
-            const electricite = document.getElementById('electricite').checked;
-            const erp = document.getElementById('erp').checked;
-            const metrage = document.getElementById('metrage').checked;
+    <script>
+        // Variables globales pour la démo mobile
+        let selectedPropertyType = '';
+        let selectedSize = '';
+        let selectedDiagnostics = [];
+
+        // Configuration identique à votre app mobile
+        const sizeOptions = {
+            appartement: ['1 pièce', '2 pièces', '3 pièces', '4 pièces', '5 pièces', '6 pièces', '7 pièces'],
+            maison: ['2 pièces', '3 pièces', '4 pièces', '5 pièces', '6 pièces', '7 pièces'],
+            commerce: ['Petit commerce (<50m²)', 'Commerce moyen (50-200m²)', 'Grand commerce (>200m²)']
+        };
+
+        const diagnosticsOptions = {
+            appartement: [
+                { id: 'erp', name: 'ERP', icon: '👁️', color: 'bg-indigo-500' },
+                { id: 'dpe', name: 'DPE', icon: '🌡️', color: 'bg-green-500' },
+                { id: 'amiante', name: 'Amiante', icon: '🛡️', color: 'bg-red-500' },
+                { id: 'termites', name: 'Termites', icon: '🐛', color: 'bg-yellow-500' },
+                { id: 'metrage', name: 'Loi Carrez', icon: '🔧', color: 'bg-teal-500' },
+                { id: 'gaz', name: 'Gaz', icon: '💨', color: 'bg-orange-500' },
+                { id: 'electricite', name: 'Électricité', icon: '⚡', color: 'bg-purple-500' },
+                { id: 'plomb', name: 'Plomb', icon: '💧', color: 'bg-blue-500' }
+            ],
+            maison: [
+                { id: 'erp', name: 'ERP', icon: '👁️', color: 'bg-indigo-500' },
+                { id: 'dpe', name: 'DPE', icon: '🌡️', color: 'bg-green-500' },
+                { id: 'amiante', name: 'Amiante', icon: '🛡️', color: 'bg-red-500' },
+                { id: 'termites', name: 'Termites', icon: '🐛', color: 'bg-yellow-500' },
+                { id: 'metrage', name: 'Loi Carrez', icon: '🔧', color: 'bg-teal-500' },
+                { id: 'gaz', name: 'Gaz', icon: '💨', color: 'bg-orange-500' },
+                { id: 'electricite', name: 'Électricité', icon: '⚡', color: 'bg-purple-500' },
+                { id: 'plomb', name: 'Plomb', icon: '💧', color: 'bg-blue-500' }
+            ],
+            commerce: [
+                { id: 'erp', name: 'ERP', icon: '👁️', color: 'bg-indigo-500' },
+                { id: 'dpe', name: 'DPE', icon: '🌡️', color: 'bg-green-500' },
+                { id: 'amiante', name: 'Amiante', icon: '🛡️', color: 'bg-red-500' },
+                { id: 'termites', name: 'Termites', icon: '🐛', color: 'bg-yellow-500' },
+                { id: 'metrage', name: 'Loi Carrez', icon: '🔧', color: 'bg-teal-500' }
+            ]
+        };
+
+        // Sélection du type de bien
+        function selectPropertyType(type) {
+            selectedPropertyType = type;
+            selectedSize = '';
+            selectedDiagnostics = [];
             
-            if (!surface || !typeBien) {
-                document.getElementById('resultat').innerHTML = '<p class="text-red-500 text-center">Veuillez remplir tous les champs obligatoires.</p>';
+            // Mise à jour visuelle des boutons de type
+            document.querySelectorAll('.property-btn').forEach(btn => {
+                btn.classList.remove('selected');
+            });
+            document.querySelector(`[data-type="${type}"]`).classList.add('selected');
+            
+            // Affichage de la sélection de taille
+            showSizeSelection();
+            document.getElementById('diagnosticsSelection').classList.add('hidden');
+            document.getElementById('calculateBtn').classList.add('hidden');
+        }
+
+        // Affichage des options de taille
+        function showSizeSelection() {
+            const sizeContainer = document.getElementById('sizeButtons');
+            sizeContainer.innerHTML = '';
+            
+            sizeOptions[selectedPropertyType].forEach(size => {
+                const button = document.createElement('button');
+                button.type = 'button';
+                button.className = 'size-btn';
+                button.textContent = size;
+                button.onclick = () => selectSize(size);
+                sizeContainer.appendChild(button);
+            });
+            
+            document.getElementById('sizeSelection').classList.remove('hidden');
+        }
+
+        // Sélection de la taille
+        function selectSize(size) {
+            selectedSize = size;
+            selectedDiagnostics = [];
+            
+            // Mise à jour visuelle des boutons de taille
+            document.querySelectorAll('.size-btn').forEach(btn => {
+                btn.classList.remove('selected');
+            });
+            event.target.classList.add('selected');
+            
+            // Affichage de la sélection des diagnostics
+            showDiagnosticsSelection();
+        }
+
+        // Affichage des options de diagnostics
+        function showDiagnosticsSelection() {
+            const diagnosticsContainer = document.getElementById('diagnosticsButtons');
+            diagnosticsContainer.innerHTML = '';
+            
+            diagnosticsOptions[selectedPropertyType].forEach(diagnostic => {
+                const button = document.createElement('button');
+                button.type = 'button';
+                button.className = 'diagnostic-btn w-full p-4 rounded-xl flex items-center justify-between';
+                button.onclick = () => toggleDiagnostic(diagnostic.id, button);
+                
+                const price = getTarif(selectedPropertyType, selectedSize, diagnostic.id);
+                
+                button.innerHTML = `
+                    <div class="flex items-center space-x-3">
+                        <div class="${diagnostic.color} w-10 h-10 rounded-full flex items-center justify-center text-white text-lg">
+                            ${diagnostic.icon}
+                        </div>
+                        <span class="font-medium">${diagnostic.name}</span>
+                    </div>
+                    <div class="text-right">
+                        <div class="font-semibold">${price}€</div>
+                        <div class="check-indicator w-5 h-5 rounded-full border-2 border-gray-300"></div>
+                    </div>
+                `;
+                
+                diagnosticsContainer.appendChild(button);
+            });
+            
+            document.getElementById('diagnosticsSelection').classList.remove('hidden');
+            document.getElementById('calculateBtn').classList.remove('hidden');
+        }
+
+        // Toggle diagnostic selection
+        function toggleDiagnostic(diagnosticId, button) {
+            const index = selectedDiagnostics.indexOf(diagnosticId);
+            const checkIndicator = button.querySelector('.check-indicator');
+            
+            if (index > -1) {
+                selectedDiagnostics.splice(index, 1);
+                button.classList.remove('selected');
+                checkIndicator.style.backgroundColor = '';
+                checkIndicator.style.borderColor = '#d1d5db';
+            } else {
+                selectedDiagnostics.push(diagnosticId);
+                button.classList.add('selected');
+                checkIndicator.style.backgroundColor = '#10b981';
+                checkIndicator.style.borderColor = '#10b981';
+                checkIndicator.innerHTML = '<div class="w-2 h-2 bg-white rounded-full mx-auto mt-0.5"></div>';
+            }
+        }
+
+        // Récupération du tarif
+        function getTarif(propertyType, size, diagnosticId) {
+            const tarifsReels = {
+                maison: {
+                    '2 pièces': { erp: 35, dpe: 103.50, amiante: 86.25, termites: 86.25, metrage: 97.75, gaz: 97.75, electricite: 80.50, plomb: 103.50 },
+                    '3 pièces': { erp: 35, dpe: 117, amiante: 97.50, termites: 97.50, metrage: 110.50, gaz: 110.50, electricite: 91, plomb: 117 },
+                    '4 pièces': { erp: 35, dpe: 126, amiante: 105, termites: 105, metrage: 119, gaz: 119, electricite: 98, plomb: 126 },
+                    '5 pièces': { erp: 35, dpe: 135, amiante: 112.50, termites: 112.50, metrage: 127.50, gaz: 127.50, electricite: 105, plomb: 135 },
+                    '6 pièces': { erp: 35, dpe: 180, amiante: 150, termites: 150, metrage: 170, gaz: 170, electricite: 140, plomb: 180 },
+                    '7 pièces': { erp: 35, dpe: 225, amiante: 187.50, termites: 187.50, metrage: 212.50, gaz: 212.50, electricite: 175, plomb: 225 }
+                },
+                appartement: {
+                    '1 pièce': { erp: 35, dpe: 90, amiante: 75, termites: 75, metrage: 85, gaz: 85, electricite: 70, plomb: 90 },
+                    '2 pièces': { erp: 35, dpe: 94.50, amiante: 78.75, termites: 78.75, metrage: 89.25, gaz: 89.25, electricite: 73.50, plomb: 94.50 },
+                    '3 pièces': { erp: 35, dpe: 99, amiante: 82.50, termites: 82.50, metrage: 93.50, gaz: 93.50, electricite: 77, plomb: 99 },
+                    '4 pièces': { erp: 35, dpe: 103.50, amiante: 86.25, termites: 86.25, metrage: 97.75, gaz: 97.75, electricite: 80.50, plomb: 103.50 },
+                    '5 pièces': { erp: 35, dpe: 112.50, amiante: 93.75, termites: 93.75, metrage: 106.25, gaz: 106.25, electricite: 87.50, plomb: 112.50 },
+                    '6 pièces': { erp: 35, dpe: 117, amiante: 97.50, termites: 97.50, metrage: 110.50, gaz: 110.50, electricite: 91, plomb: 117 },
+                    '7 pièces': { erp: 35, dpe: 126, amiante: 105, termites: 105, metrage: 119, gaz: 119, electricite: 98, plomb: 126 }
+                },
+                commerce: {
+                    'Petit commerce (<50m²)': { erp: 35, dpe: 117, amiante: 98, termites: 98, metrage: 115 },
+                    'Commerce moyen (50-200m²)': { erp: 35, dpe: 130, amiante: 110, termites: 110, metrage: 125 },
+                    'Grand commerce (>200m²)': { erp: 35, dpe: 210, amiante: 190, termites: 190, metrage: 200 }
+                }
+            };
+            
+            return tarifsReels[propertyType]?.[size]?.[diagnosticId] || 0;
+        }
+
+        // Calcul du devis avec l'interface mobile
+        function calculerDevisStyle() {
+            if (!selectedPropertyType || !selectedSize || selectedDiagnostics.length === 0) {
+                document.getElementById('resultat').innerHTML = '<p class="text-red-500 text-center">Veuillez sélectionner le type, la taille et au moins un diagnostic.</p>';
                 return;
             }
             
-            // Tarifs réels selon votre calculatrice professionnelle
             let total = 0;
             let details = [];
             
-            // Détermination du type de bien et taille pour les tarifs
-            let bienType, tailleBien;
-            if (typeBien === 'appartement') {
-                bienType = 'appartement';
-                if (surface <= 30) tailleBien = '1 pièce';
-                else if (surface <= 50) tailleBien = '2 pièces';
-                else if (surface <= 70) tailleBien = '3 pièces';
-                else if (surface <= 90) tailleBien = '4 pièces';
-                else if (surface <= 110) tailleBien = '5 pièces';
-                else if (surface <= 130) tailleBien = '6 pièces';
-                else tailleBien = '7 pièces';
-            } else if (typeBien === 'maison') {
-                bienType = 'maison';
-                if (surface <= 60) tailleBien = '2 pièces';
-                else if (surface <= 80) tailleBien = '3 pièces';
+            selectedDiagnostics.forEach(diagnosticId => {
+                const price = getTarif(selectedPropertyType, selectedSize, diagnosticId);
+                const diagnostic = diagnosticsOptions[selectedPropertyType].find(d => d.id === diagnosticId);
+                total += price;
+                details.push(`${diagnostic.name}: ${price}€`);
+            });
+            
+            // Système de remises réel
+            const nbDiagnostics = selectedDiagnostics.length;
+            let remise = 0;
+            let tauxRemise = 0;
+            
+            const remisesReelles = {
+                3: 7, 4: 13, 5: 28, 6: 32, 7: 34, 8: 40
+            };
+            
+            if (nbDiagnostics >= 3) {
+                tauxRemise = remisesReelles[Math.min(nbDiagnostics, 8)] || 0;
+                remise = total * (tauxRemise / 100);
+            }
+            
+            const totalFinal = total - remise;
+            
+            let html = `
+                <div class="space-y-4">
+                    <h4 class="font-semibold text-lg text-blue-600">Devis pour ${selectedPropertyType} de ${selectedSize}</h4>
+                    <div class="space-y-2">
+                        ${details.map(detail => `<div class="flex justify-between border-b border-gray-200 pb-1"><span>${detail.split(':')[0]}:</span><span class="font-medium">${detail.split(':')[1]}</span></div>`).join('')}
+                    </div>
+                    <hr class="border-gray-300">
+                    <div class="flex justify-between"><span>Sous-total:</span><span class="font-medium">${total.toFixed(2)}€</span></div>
+                    ${remise > 0 ? `<div class="flex justify-between text-green-600"><span>Remise ${tauxRemise}% (${nbDiagnostics} diagnostics):</span><span class="font-medium">-${remise.toFixed(2)}€</span></div>` : ''}
+                    <div class="flex justify-between font-bold text-xl border-t-2 border-blue-600 pt-3">
+                        <span>Total:</span><span class="text-blue-600">${totalFinal.toFixed(2)}€</span>
+                    </div>
+                </div>
+                <div class="mt-6 p-4 bg-blue-50 rounded-lg">
+                    <p class="text-sm text-blue-800">
+                        <i class="fas fa-info-circle mr-2"></i>
+                        <strong>Version démo limitée :</strong> La version complète mobile calcule instantanément avec vos tarifs personnalisés et génère un PDF professionnel !
+                    </p>
+                </div>
+            `;
+            
+            document.getElementById('resultat').innerHTML = html;
+        }
+        
+        // Anciennes fonctions (gardées pour compatibilité mais inutilisées)
+        function calculerDevis() {
+            // Cette fonction n'est plus utilisée mais gardée pour éviter les erreurs
+            calculerDevisStyle();
+        }
                 else if (surface <= 100) tailleBien = '4 pièces';
                 else if (surface <= 130) tailleBien = '5 pièces';
                 else if (surface <= 160) tailleBien = '6 pièces';
