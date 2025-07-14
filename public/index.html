@@ -179,6 +179,12 @@
                                         <label class="flex items-center">
                                             <input type="checkbox" id="electricite" class="mr-2 text-blue-600"> Installation électrique
                                         </label>
+                                        <label class="flex items-center">
+                                            <input type="checkbox" id="erp" class="mr-2 text-blue-600"> ERP (État des Risques et Pollutions)
+                                        </label>
+                                        <label class="flex items-center">
+                                            <input type="checkbox" id="metrage" class="mr-2 text-blue-600"> Métrage Loi Carrez
+                                        </label>
                                     </div>
                                 </div>
                                 
@@ -485,45 +491,103 @@
             const termites = document.getElementById('termites').checked;
             const gaz = document.getElementById('gaz').checked;
             const electricite = document.getElementById('electricite').checked;
+            const erp = document.getElementById('erp').checked;
+            const metrage = document.getElementById('metrage').checked;
             
             if (!surface || !typeBien) {
                 document.getElementById('resultat').innerHTML = '<p class="text-red-500 text-center">Veuillez remplir tous les champs obligatoires.</p>';
                 return;
             }
             
-            // Tarifs de base (exemple réaliste)
+            // Tarifs réels selon votre calculatrice professionnelle
             let total = 0;
             let details = [];
             
-            if (dpe) {
-                const prixDpe = typeBien === 'appartement' ? 120 : (typeBien === 'maison' ? 150 : 180);
-                total += prixDpe;
-                details.push(`DPE: ${prixDpe}€`);
+            // Détermination du type de bien et taille pour les tarifs
+            let bienType, tailleBien;
+            if (typeBien === 'appartement') {
+                bienType = 'appartement';
+                if (surface <= 30) tailleBien = '1 pièce';
+                else if (surface <= 50) tailleBien = '2 pièces';
+                else if (surface <= 70) tailleBien = '3 pièces';
+                else if (surface <= 90) tailleBien = '4 pièces';
+                else if (surface <= 110) tailleBien = '5 pièces';
+                else if (surface <= 130) tailleBien = '6 pièces';
+                else tailleBien = '7 pièces';
+            } else if (typeBien === 'maison') {
+                bienType = 'maison';
+                if (surface <= 60) tailleBien = '2 pièces';
+                else if (surface <= 80) tailleBien = '3 pièces';
+                else if (surface <= 100) tailleBien = '4 pièces';
+                else if (surface <= 130) tailleBien = '5 pièces';
+                else if (surface <= 160) tailleBien = '6 pièces';
+                else tailleBien = '7 pièces';
+            } else {
+                bienType = 'commerce';
+                if (surface < 50) tailleBien = 'Petit commerce (<50m²)';
+                else if (surface <= 200) tailleBien = 'Commerce moyen (50-200m²)';
+                else tailleBien = 'Grand commerce (>200m²)';
             }
-            if (amiante) {
-                const prixAmiante = surface < 50 ? 90 : (surface < 100 ? 120 : 150);
-                total += prixAmiante;
-                details.push(`Amiante: ${prixAmiante}€`);
+            
+            // Grille tarifaire réelle de votre calculatrice (COMPLÈTE avec ERP et Métrage)
+            const tarifsReels = {
+                maison: {
+                    '2 pièces': { erp: 35, dpe: 103.50, amiante: 86.25, termites: 86.25, metrage: 97.75, gaz: 97.75, electricite: 80.50, plomb: 103.50 },
+                    '3 pièces': { erp: 35, dpe: 117, amiante: 97.50, termites: 97.50, metrage: 110.50, gaz: 110.50, electricite: 91, plomb: 117 },
+                    '4 pièces': { erp: 35, dpe: 126, amiante: 105, termites: 105, metrage: 119, gaz: 119, electricite: 98, plomb: 126 },
+                    '5 pièces': { erp: 35, dpe: 135, amiante: 112.50, termites: 112.50, metrage: 127.50, gaz: 127.50, electricite: 105, plomb: 135 },
+                    '6 pièces': { erp: 35, dpe: 180, amiante: 150, termites: 150, metrage: 170, gaz: 170, electricite: 140, plomb: 180 },
+                    '7 pièces': { erp: 35, dpe: 225, amiante: 187.50, termites: 187.50, metrage: 212.50, gaz: 212.50, electricite: 175, plomb: 225 }
+                },
+                appartement: {
+                    '1 pièce': { erp: 35, dpe: 90, amiante: 75, termites: 75, metrage: 85, gaz: 85, electricite: 70, plomb: 90 },
+                    '2 pièces': { erp: 35, dpe: 94.50, amiante: 78.75, termites: 78.75, metrage: 89.25, gaz: 89.25, electricite: 73.50, plomb: 94.50 },
+                    '3 pièces': { erp: 35, dpe: 99, amiante: 82.50, termites: 82.50, metrage: 93.50, gaz: 93.50, electricite: 77, plomb: 99 },
+                    '4 pièces': { erp: 35, dpe: 103.50, amiante: 86.25, termites: 86.25, metrage: 97.75, gaz: 97.75, electricite: 80.50, plomb: 103.50 },
+                    '5 pièces': { erp: 35, dpe: 112.50, amiante: 93.75, termites: 93.75, metrage: 106.25, gaz: 106.25, electricite: 87.50, plomb: 112.50 },
+                    '6 pièces': { erp: 35, dpe: 117, amiante: 97.50, termites: 97.50, metrage: 110.50, gaz: 110.50, electricite: 91, plomb: 117 },
+                    '7 pièces': { erp: 35, dpe: 126, amiante: 105, termites: 105, metrage: 119, gaz: 119, electricite: 98, plomb: 126 }
+                },
+                commerce: {
+                    'Petit commerce (<50m²)': { erp: 35, dpe: 117, amiante: 98, termites: 98, metrage: 115 },
+                    'Commerce moyen (50-200m²)': { erp: 35, dpe: 130, amiante: 110, termites: 110, metrage: 125 },
+                    'Grand commerce (>200m²)': { erp: 35, dpe: 210, amiante: 190, termites: 190, metrage: 200 }
+                }
+            };
+            
+            const tarifs = tarifsReels[bienType]?.[tailleBien] || {};
+            
+            if (dpe && tarifs.dpe) {
+                total += tarifs.dpe;
+                details.push(`DPE: ${tarifs.dpe}€`);
             }
-            if (plomb) {
-                const prixPlomb = surface < 50 ? 80 : (surface < 100 ? 100 : 130);
-                total += prixPlomb;
-                details.push(`Plomb: ${prixPlomb}€`);
+            if (amiante && tarifs.amiante) {
+                total += tarifs.amiante;
+                details.push(`Amiante: ${tarifs.amiante}€`);
             }
-            if (termites) {
-                const prixTermites = surface < 50 ? 85 : (surface < 100 ? 110 : 140);
-                total += prixTermites;
-                details.push(`Termites: ${prixTermites}€`);
+            if (plomb && tarifs.plomb) {
+                total += tarifs.plomb;
+                details.push(`Plomb: ${tarifs.plomb}€`);
             }
-            if (gaz) {
-                const prixGaz = 70;
-                total += prixGaz;
-                details.push(`Installation gaz: ${prixGaz}€`);
+            if (termites && tarifs.termites) {
+                total += tarifs.termites;
+                details.push(`Termites: ${tarifs.termites}€`);
             }
-            if (electricite) {
-                const prixElec = 75;
-                total += prixElec;
-                details.push(`Installation électrique: ${prixElec}€`);
+            if (gaz && tarifs.gaz) {
+                total += tarifs.gaz;
+                details.push(`Installation gaz: ${tarifs.gaz}€`);
+            }
+            if (electricite && tarifs.electricite) {
+                total += tarifs.electricite;
+                details.push(`Installation électrique: ${tarifs.electricite}€`);
+            }
+            if (erp && tarifs.erp) {
+                total += tarifs.erp;
+                details.push(`ERP: ${tarifs.erp}€`);
+            }
+            if (metrage && tarifs.metrage) {
+                total += tarifs.metrage;
+                details.push(`Métrage Loi Carrez: ${tarifs.metrage}€`);
             }
             
             if (details.length === 0) {
@@ -531,12 +595,22 @@
                 return;
             }
             
-            // Remise démo si plus de 2 diagnostics
+            // Système de remises réel de votre calculatrice
             const nbDiagnostics = details.length;
             let remise = 0;
             let tauxRemise = 0;
+            
+            const remisesReelles = {
+                3: 7,    // 7% pour 3 diagnostics
+                4: 13,   // 13% pour 4 diagnostics
+                5: 28,   // 28% pour 5 diagnostics
+                6: 32,   // 32% pour 6 diagnostics
+                7: 34,   // 34% pour 7 diagnostics
+                8: 40    // 40% pour 8+ diagnostics
+            };
+            
             if (nbDiagnostics >= 3) {
-                tauxRemise = nbDiagnostics >= 5 ? 20 : 15; // 20% pour 5+ diagnostics, 15% pour 3-4
+                tauxRemise = remisesReelles[Math.min(nbDiagnostics, 8)] || 0;
                 remise = total * (tauxRemise / 100);
             }
             
